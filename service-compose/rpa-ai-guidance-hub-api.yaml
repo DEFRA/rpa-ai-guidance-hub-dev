@@ -1,0 +1,39 @@
+services:
+  rpa-ai-guidance-hub-api:
+    build:
+      target: development
+      context: ../repos/rpa-ai-guidance-hub-api
+    ports:
+      - 8085:8085
+    links:
+      - "floci:floci"
+      - "mongodb:mongodb"
+    depends_on:
+      floci:
+        condition: service_healthy
+      # Not service_started: the app pings Mongo during FastAPI lifespan
+      # startup and exits if it is unreachable.
+      mongodb:
+        condition: service_healthy
+    env_file:
+      - path: ../.env
+        required: false
+    environment:
+      PYTHON_ENV: development # enables uvicorn hot reload
+      PORT: 8085 # hard-set: ${PORT:-...} would collide with the UI's PORT
+      HOST: 0.0.0.0
+      # Hard-set, not ${VAR:-default}: ../.env holds host-oriented values that would win.
+      MONGO_URI: mongodb://mongodb:27017/
+      FLOCI_ENDPOINT_URL: http://floci:4566
+      AWS_ENDPOINT_URL: http://floci:4566
+      # AppConfig has no default for this and refuses to start without it.
+      CLAUDE_SONNET_MODEL_CONFIG: ${CLAUDE_SONNET_MODEL_CONFIG:-anthropic.claude-sonnet-4-6,arn:aws:bedrock:eu-west-2:123456789012:application-inference-profile/fake-profile-local}
+    volumes:
+      - ../repos/rpa-ai-guidance-hub-api/app:/home/nonroot/app
+    develop:
+      watch:
+        - action: rebuild
+          path: ../repos/rpa-ai-guidance-hub-api/pyproject.toml
+          target: /home/nonroot/pyproject.toml
+    networks:
+      - rpa-ai-guidance-hub

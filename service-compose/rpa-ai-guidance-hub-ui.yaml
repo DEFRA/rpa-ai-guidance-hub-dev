@@ -1,0 +1,48 @@
+services:
+  rpa-ai-guidance-hub-ui:
+    build:
+      target: development
+      context: ../repos/rpa-ai-guidance-hub-ui
+    ports:
+      - '3000:3000'
+      - '9229:9229' # node inspector (nodemon runs with --inspect=0.0.0.0)
+    links:
+      - "floci:floci"
+      - "redis:redis"
+    depends_on:
+      floci:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    env_file:
+      - path: ../.env
+        required: false
+    environment:
+      PORT: 3000 # hard-set: ${PORT:-...} would collide with the API's PORT
+      HOST: 0.0.0.0
+      # The repo's own compose.yml sets production, which flips convict to
+      # redis-backed sessions, secure cookies and ECS logs.
+      NODE_ENV: development
+      LOG_FORMAT: pino-pretty
+      SESSION_COOKIE_SECURE: false
+      REDIS_HOST: redis
+      USE_SINGLE_INSTANCE_CACHE: true
+      # Hard-set, not ${VAR:-default}: ../.env holds host-oriented values that would win.
+      AWS_ENDPOINT_URL: http://floci:4566
+      # Not consumed yet — the UI's convict schema validates with
+      # `allowed: 'strict'`, so this needs a matching entry in
+      # src/config/config.js before it reaches the app.
+      API_BASE_URL: http://rpa-ai-guidance-hub-api:8085
+    volumes:
+      # nodemon watches ./src/server and ./src/config with --legacy-watch
+      # (polling), which is what makes reload work over a bind mount.
+      # Client assets are built into /home/node/.public at image build time
+      # and are not shadowed by this mount — changing them needs a rebuild.
+      - ../repos/rpa-ai-guidance-hub-ui/src:/home/node/src
+    develop:
+      watch:
+        - action: rebuild
+          path: ../repos/rpa-ai-guidance-hub-ui/package.json
+          target: /home/node/package.json
+    networks:
+      - rpa-ai-guidance-hub
