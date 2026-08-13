@@ -29,10 +29,17 @@ services:
       USE_SINGLE_INSTANCE_CACHE: true
       # Hard-set, not ${VAR:-default}: ../.env holds host-oriented values that would win.
       AWS_ENDPOINT_URL: http://floci:4566
-      # Not consumed yet — the UI's convict schema validates with
-      # `allowed: 'strict'`, so this needs a matching entry in
+      # None of the four below are consumed yet — the UI's convict schema
+      # validates with `allowed: 'strict'`, so each needs a matching entry in
       # src/config/config.js before it reaches the app.
       API_BASE_URL: http://rpa-ai-guidance-hub-api:8085
+      # Server-side: where the UI POSTs /initiate to start an upload.
+      CDP_UPLOADER_BASE_URL: http://cdp-uploader:7337
+      # Browser-facing: /initiate already returns an `uploadUrl` built from the
+      # uploader's APP_BASE_URL, so this is only needed if the UI rewrites it.
+      CDP_UPLOADER_BROWSER_URL: http://localhost:7337
+      # Destination bucket named in the /initiate call.
+      SOURCE_DOCS_S3_BUCKET: ${SOURCE_DOCS_S3_BUCKET:-rpa-ai-guidance-hub-source-docs}
     volumes:
       # nodemon watches ./src/server and ./src/config with --legacy-watch
       # (polling), which is what makes reload work over a bind mount.

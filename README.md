@@ -71,6 +71,9 @@ Note that `.env` holds *host*-oriented endpoints, for running a service directly
 | AWS_EMF_SERVICE_NAME | service-name | No | Logical service name for EMF metrics |
 | AWS_EMF_SERVICE_TYPE | python-backend-service | No | Service type used by EMF instrumentation |
 | FLOCI_ENDPOINT_URL | http://localhost:4566 | No | Floci endpoint for host-side runs; overridden to `http://floci:4566` in compose |
+| CDP_UPLOADER_BASE_URL | http://localhost:7337 | No | cdp-uploader endpoint for host-side runs; overridden to `http://cdp-uploader:7337` in compose |
+| CDP_UPLOADER_BROWSER_URL | http://localhost:7337 | No | cdp-uploader endpoint as the browser sees it |
+| SOURCE_DOCS_S3_BUCKET | rpa-ai-guidance-hub-source-docs | No | Destination bucket for documents uploaded through cdp-uploader |
 | AWS_BEARER_TOKEN_BEDROCK | dummy_token_for_bedrock | No | Bedrock bearer token; replace to call a real model |
 | CLAUDE_SONNET_MODEL_CONFIG | placeholder profile ARN | No | `model_id,inference_profile[,guardrail_id:guardrail_version]`; the API will not start without it |
 
@@ -104,8 +107,22 @@ The services can still be started individually from their own repositories. This
 | 4566 | floci (AWS emulator) |
 | 27017 | mongodb |
 | 6379 | redis |
+| 7337 | cdp-uploader |
 
 Once up: <http://localhost:3000> for the UI, <http://localhost:8085/docs> for the API's Swagger UI.
+
+## File Uploads
+
+`cdp-uploader` is included so the document-upload flow can be developed locally. A service starts an upload by POSTing to `http://cdp-uploader:7337/initiate` with a destination bucket and redirect URL; the browser then posts the file to the returned `uploadUrl`. Files land in `cdp-uploader-quarantine`, are virus-scanned, and clean ones are copied to the destination bucket — `rpa-ai-guidance-hub-source-docs`, created at startup by `compose/floci/start.d/10-setup-resources.sh`.
+
+Scanning is mocked (`MOCK_VIRUS_SCAN_ENABLED`), so every upload is reported clean after ~3 seconds and no ClamAV container is needed.
+
+Neither service consumes the uploader yet. The environment variables are in place; the config entries that read them are not.
+
+```bash
+# what has been uploaded so far
+docker compose exec floci aws s3 ls s3://rpa-ai-guidance-hub-source-docs --endpoint-url=http://localhost:4566
+```
 
 ## Live Reload
 

@@ -1,0 +1,35 @@
+services:
+  cdp-uploader:
+    image: defradigital/cdp-uploader@sha256:eb1627b60690ec24d41a17ed82e80c28d009aaaeb19dc179c6a3887da7e6a5bd
+    ports:
+      - '7337:7337'
+    links:
+      - 'floci:floci'
+      - 'redis:redis'
+    depends_on:
+      # The uploader's buckets and queues are created by
+      # compose/floci/start.d/01-cdp-uploader.sh, which the healthcheck gates.
+      floci:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      AWS_REGION: eu-west-2
+      AWS_DEFAULT_REGION: eu-west-2
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      PORT: 7337
+      NODE_ENV: development
+      REDIS_HOST: redis
+      USE_SINGLE_INSTANCE_CACHE: true
+      # Stubs out ClamAV: uploads are marked clean after this many seconds, so
+      # no virus-scanner container is needed locally.
+      MOCK_VIRUS_SCAN_ENABLED: true
+      MOCK_VIRUS_RESULT_DELAY: 3
+      SQS_ENDPOINT: http://floci:4566
+      S3_ENDPOINT: http://floci:4566
+      # Browser-facing: the uploader builds the `uploadUrl` it hands back from
+      # /initiate out of this, and the browser posts the file straight to it.
+      APP_BASE_URL: http://localhost:7337
+    networks:
+      - rpa-ai-guidance-hub
