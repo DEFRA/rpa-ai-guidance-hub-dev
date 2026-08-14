@@ -1,0 +1,24 @@
+{
+  "folders": [
+    {
+      "path": "."
+    },
+    {
+      "path": "repos/rpa-ai-guidance-hub-api"
+    },
+    {
+      "path": "repos/rpa-ai-guidance-hub-ui"
+    }
+  ],
+  "settings": {
+    "files.watcherExclude": {
+      "**/.git/objects/**": true,
+      "**/node_modules/**": true,
+      "**/dist/**": true,
+      "**/build/**": true,
+      "**/.venv/**": true
+    },
+    "python.defaultInterpreterPath": "${workspaceFolder:rpa-ai-guidance-hub-api}/.venv/bin/python",
+    "python.terminal.activateEnvironment": false
+  }
+}
