@@ -53,12 +53,19 @@ An example is provided at `.env.example`:
 cp .env.example .env
 ```
 
-`.env` is optional — the compose files supply working defaults for every variable, so the stack starts without it. Create one when you need real values (notably a real Bedrock inference profile in `CLAUDE_SONNET_MODEL_CONFIG`).
+`.env` is *mostly* optional — the compose files supply working defaults for every variable they
+set, so floci, mongodb, redis, cdp-uploader and the API all come up without one. The **UI does
+not**: it needs `SESSION_COOKIE_PASSWORD` or it exits with
+`session.cookie.password: must be of type String`. Set that (and `AUTH_PROVIDER=local` unless you
+have real Entra credentials) before `docker compose up`, plus a real Bedrock inference profile in
+`CLAUDE_SONNET_MODEL_CONFIG` if you want to exercise the LLM.
 
 Note that `.env` holds *host*-oriented endpoints, for running a service directly on your machine against dockerised dependencies. The compose files hard-set the container-oriented equivalents over the top.
 
 | Variable | Default | Required | Description |
 |---|---|:---:|---|
+| SESSION_COOKIE_PASSWORD | _(none)_ | **Yes** | UI session cookie password, 32+ chars (`openssl rand -base64 32`). The UI will not start without it |
+| AUTH_PROVIDER | entra | No | `local` for a development login; `entra` additionally needs the `ENTRA_*` variables |
 | AWS_REGION | eu-west-2 | No | Primary AWS region used by services |
 | AWS_DEFAULT_REGION | eu-west-2 | No | Fallback AWS region environment variable |
 | AWS_ACCESS_KEY_ID | test | No | AWS access key (use local/test credentials for local dev) |
@@ -160,3 +167,4 @@ Switches to and pulls the latest main branch for each microservice.
 ```bash
 uv run task update
 ```
+
