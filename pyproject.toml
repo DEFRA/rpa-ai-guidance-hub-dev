@@ -13,3 +13,4 @@ dependencies = [
 clone = "python scripts/clone.py"
 pull = "python scripts/pull.py"
 update = "python scripts/update.py"
+convert = "python scripts/convert_doc.py"
