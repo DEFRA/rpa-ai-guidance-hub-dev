@@ -22,17 +22,11 @@ Examples:
 """
 
 import argparse
-import os
 import re
-import shutil
-import subprocess
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-API_REPO = REPO_ROOT / "repos" / "rpa-ai-guidance-hub-api"
-INPUT_DIR = REPO_ROOT / "data" / "input"
-OUTPUT_DIR = REPO_ROOT / "data" / "output"
+from docx_tools import OUTPUT_DIR, resolve_input, resolve_uv, run_in_api_repo
 
 PARSE_SCRIPT = "scripts/parse_docx.py"
 
@@ -46,33 +40,6 @@ def images_dir_name(output: Path) -> str:
     one directory cannot write over each other's images.
     """
     return f"{_WHITESPACE_RUN.sub('-', output.stem)}-images"
-
-
-def resolve_uv() -> str:
-    """Return the uv executable, which runs the parse in the API repository."""
-    found = shutil.which("uv")
-    if found:
-        return found
-
-    message = (
-        "uv not found on PATH. See https://docs.astral.sh/uv/getting-started/ "
-        "-- this repository's tasks all run through it."
-    )
-    raise SystemExit(message)
-
-
-def resolve_input(name: str) -> Path:
-    """Resolve a document argument to a readable .docx, or fail with advice."""
-    given = Path(name)
-    if given.is_file():
-        return given.resolve()
-
-    in_data = INPUT_DIR / name
-    if in_data.is_file():
-        return in_data.resolve()
-
-    message = f"Document not found: {name}\nLooked for it as given, and in {INPUT_DIR}."
-    raise SystemExit(message)
 
 
 def classify(arguments: list[str]) -> tuple[list[str], Path | None]:
@@ -117,19 +84,10 @@ def convert(uv: str, document: Path, output: Path) -> None:
     """Render one .docx to Markdown using the API repository's parser."""
     images = output.parent / images_dir_name(output)
 
-    # This script is itself usually launched by `uv run`, which exports
-    # VIRTUAL_ENV. The nested uv run below targets a different project, and would
-    # warn about the mismatch on every document; dropping the variable lets it
-    # select the API repository's own environment quietly.
-    env = {k: v for k, v in os.environ.items() if k != "VIRTUAL_ENV"}
-
-    result = subprocess.run(  # noqa: S603 - fixed argv, no shell
+    run_in_api_repo(
+        uv,
+        PARSE_SCRIPT,
         [
-            uv,
-            "run",
-            "--directory",
-            str(API_REPO),
-            PARSE_SCRIPT,
             str(document),
             str(output),
             "--images-dir",
@@ -137,12 +95,7 @@ def convert(uv: str, document: Path, output: Path) -> None:
             "--images-prefix",
             f"{images.name}/",
         ],
-        env=env,
-        check=False,
     )
-    if result.returncode != 0:
-        message = f"parse failed for {document.name}"
-        raise RuntimeError(message)
 
 
 def parse_args() -> argparse.Namespace:

@@ -22,6 +22,8 @@ uv sync --frozen          # install this repo's tooling (ruff, taskipy)
 uv run task clone         # clone every service into ./repos/ (skips existing)
 uv run task pull          # git pull each cloned service on its current branch
 uv run task update        # checkout main + pull each cloned service
+uv run task convert       # render data/input/*.docx to Markdown in data/output/
+uv run task audit         # report what that conversion loses, section by section
 docker compose up --build # build and run all services + dependencies
 docker compose watch      # as above, plus rebuild on dependency-manifest changes
 docker compose down       # stop everything
@@ -44,6 +46,14 @@ The clone/pull/update scripts resolve `service-compose/` and `repos/` from the *
 directory**, not from the script location, so they must be run from the repo root. All three fan out
 across the repos concurrently with `asyncio` and never fail the process — a repo that is missing, not
 a git checkout, or whose git command failed is reported on stdout and skipped.
+
+`convert_doc.py` and `audit_doc.py` are wrappers, not implementations: both shell out through
+`scripts/docx_tools.py` to a script in the API repo (`scripts/parse_docx.py`, `scripts/audit_docx.py`)
+so the document is read with *that* repo's pinned `python-docx` and its real parser. Nothing to do
+with documents is installed here. `task audit` scores the words and URLs Word renders in each section
+against the Markdown the parser produces, excluding the cover page and contents; `--missing` lists
+what was dropped. The parser is still being built out, so a low score is the current baseline rather
+than a regression — re-run it as each parsing feature lands.
 
 ## How the orchestration fits together
 
