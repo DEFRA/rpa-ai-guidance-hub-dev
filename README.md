@@ -10,6 +10,8 @@ Local development support for running / developing the RPA AI Guidance Hub local
 - uv - [Installation Guide](https://docs.astral.sh/uv/getting-started/installation/#installing-uv)
 - Python 3.13 or higher - We recommend using uv to manage your Python environment.
 - Git
+- Node.js 24 or higher - only for `uv run task view`, which is the one script that runs on the
+  host rather than in Docker. [Installation Guide](https://nodejs.org/en/download)
 
 ## Repositories
 
@@ -166,5 +168,21 @@ Switches to and pulls the latest main branch for each microservice.
 
 ```bash
 uv run task update
+```
+
+### View
+
+Opens one converted Markdown document in a browser: the Markdown the parser wrote, a diff of what
+normalising it through TipTap changes, and a read-only TipTap rendering. A toggle switches the
+rendering between the original Markdown and the round-tripped Markdown, so you can see the losses
+as well as read them.
+
+Convert the document first with `uv run task convert <document.docx>`; this reads the `.md` it
+wrote to `data/output/`. The server runs until you interrupt it, and reloads the page whenever the
+document is converted again. Requires Node.js and the UI repository's dependencies
+(`npm --prefix repos/rpa-ai-guidance-hub-ui install`).
+
+```bash
+uv run task view "<document>.md"          # add --port N or --no-open if you need them
 ```
 
