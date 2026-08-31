@@ -65,8 +65,32 @@ def resolve_markdown(name: str) -> Path:
 
     Converted Markdown is looked for in data/output/ rather than data/input/,
     because that is where `convert_doc.py` writes it.
+
+    A .docx stands for the Markdown converted from it, since naming the Word
+    document is the obvious thing to try and the file itself is never renderable:
+    its zip bytes would reach the browser as though they were Markdown.
     """
     given = Path(name)
+
+    if given.suffix.lower() == ".docx":
+        converted = OUTPUT_DIR / f"{given.stem}.md"
+        if converted.is_file():
+            return converted.resolve()
+
+        message = (
+            f"No converted Markdown for {given.name}\n"
+            f"Looked for {converted}.\n"
+            f'Convert it first with: uv run task convert "{given.name}"'
+        )
+        raise SystemExit(message)
+
+    if given.suffix.lower() != ".md":
+        message = (
+            f"Not a Markdown file: {name}\n"
+            f"This renders the .md that `uv run task convert` writes to {OUTPUT_DIR}."
+        )
+        raise SystemExit(message)
+
     if given.is_file():
         return given.resolve()
 

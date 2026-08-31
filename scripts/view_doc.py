@@ -15,13 +15,16 @@ The server keeps running until interrupted. Re-running `uv run task convert` in
 another terminal reloads the page.
 
 Usage:
-  uv run python scripts/view_doc.py <document.md> [--port N] [--no-open]
+  uv run python scripts/view_doc.py <document> [--port N] [--no-open]
 
 Only one document at a time, since this starts a server rather than producing a
-file. A .md is looked up in data/output/ when it is not a path that exists.
+file. A .md is looked up in data/output/ when it is not a path that exists, and
+naming the .docx it was converted from works too -- the Markdown beside it in
+data/output/ is what gets rendered.
 
 Examples:
   uv run task view guide.md
+  uv run task view guide.docx
   uv run task view guide.md --port 4000
   uv run task view /tmp/somewhere-else.md --no-open
 """
@@ -41,7 +44,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "document",
         metavar="FILE",
-        help=f"One .md document, by path or by name in {OUTPUT_DIR}.",
+        help=f"One .md document by path or by name in {OUTPUT_DIR}, or the .docx it came from.",
     )
     parser.add_argument(
         "--port",

@@ -178,8 +178,9 @@ rendering between the original Markdown and the round-tripped Markdown, so you c
 as well as read them.
 
 Convert the document first with `uv run task convert <document.docx>`; this reads the `.md` it
-wrote to `data/output/`. The server runs until you interrupt it, and reloads the page whenever the
-document is converted again. Requires Node.js and the UI repository's dependencies
+wrote to `data/output/`. Naming the `.docx` works too — it stands for the Markdown converted from
+it, since the Word file itself is not something this can render. The server runs until you interrupt
+it, and reloads the page whenever the document is converted again. Requires Node.js and the UI repository's dependencies
 (`npm --prefix repos/rpa-ai-guidance-hub-ui install`).
 
 ```bash
