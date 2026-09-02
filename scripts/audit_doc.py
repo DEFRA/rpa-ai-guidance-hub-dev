@@ -3,8 +3,14 @@
 
 Runs the API repository's own audit rather than reimplementing it, so what is
 scored is what the application would really produce. Each document is read twice --
-once directly for the words and URLs Word puts on the page, once through the
-parser -- and the report is the share of each Word section the Markdown covers.
+once directly for what Word puts on the page, once through the parser -- and the
+report is the share of each Word section the Markdown covers.
+
+Three things are counted. Words and URLs say whether the document still says what it
+said; marks say whether it still looks how it looked, a mark being one word wearing
+one feature -- bold, a colour, a link, the list or table or box it sits in. The
+feature table under the report breaks the marks down by feature, and its last column
+counts the marks the Markdown wears that the document never asked for.
 
 The cover page and the table of contents are excluded: the audit starts at the
 first body heading.
@@ -43,7 +49,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--missing",
         action="store_true",
-        help="List the words and URLs that never reached the Markdown.",
+        help="List the words, URLs and marks that never reached the Markdown.",
     )
     parser.add_argument(
         "--top",

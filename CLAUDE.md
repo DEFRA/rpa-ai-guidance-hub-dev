@@ -55,10 +55,19 @@ document is read with *that* repo's pinned `python-docx` and its real parser; `v
 `scripts/preview-markdown/server.js` in the **UI** repo, so the editor is the one the front end will
 really use. Nothing to do with documents is installed here.
 
-`task audit` scores the words and URLs Word renders in each section against the Markdown the parser
-produces, excluding the cover page and contents; `--missing` lists what was dropped. The parser is
-still being built out, so a low score is the current baseline rather than a regression — re-run it as
-each parsing feature lands.
+`task audit` scores what Word renders in each section against the Markdown the parser produces,
+excluding the cover page and contents; `--missing` lists what was dropped. It counts three kinds of
+symbol: **words** and **urls**, which ask whether the document still says what it said, and **marks**,
+which ask whether it still looks how it looked. A mark is one word wearing one feature — bold, italic,
+underline, strikethrough, superscript, subscript, red, blue, link, list, numbered, table, box, image —
+so the conversion earns its score only by marking up the same text the document does, not by producing
+the same *number* of bold things. A feature table under the section report breaks the marks down, and
+its `spurious` column is the half a coverage score cannot show: marks the Markdown wears that Word
+never asked for.
+
+All three documents in `data/input/` currently score 100% on words, urls and marks alike, with nothing
+spurious, so the audit now catches regressions rather than reporting a backlog — re-run it as each parsing feature lands, and treat any
+score below 100% as something the conversion just broke.
 
 `task view` shows a second, different loss: what TipTap's own schema discards. It serves one page
 with the converted Markdown, a line diff of what normalising that Markdown through TipTap changed,
