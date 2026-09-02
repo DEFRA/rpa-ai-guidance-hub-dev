@@ -15,9 +15,9 @@ Three kinds of user, one system, three platform/external dependencies.
 
 ```mermaid
 flowchart LR
-  designer(["Guidance Designer"]):::actor --> hub
-  owner(["Guide Owner"]):::actor --> hub
-  reader(["RPA Staff"]):::actor --> hub
+  designer(["Designer"]):::actor --> hub
+  approver(["Approver"]):::actor --> hub
+  processor(["Processor"]):::actor --> hub
   hub["RPA AI Guidance Hub"]:::system
   hub --> entra["Defra Entra ID"]:::ext
   hub <--> uploader["CDP Uploader"]:::ext
@@ -27,10 +27,10 @@ flowchart LR
   classDef ext fill:#f3f2f1,stroke:#b1b4b6,color:#0b0c0c
 ```
 
-- **Guidance Designer** writes, uploads and maintains guidance.
-- **Guide Owner** is the named approver: reviews, approves and publishes.
-- **RPA Staff** find and read published guidance.
-- **Defra Entra ID** provides sign-in; owner and author identities come
+- **Designer** authors, uploads and reviews guidance.
+- **Approver** is the named approver for a guide: approves and publishes it.
+- **Processor** finds and reads published guidance to process applications.
+- **Defra Entra ID** provides sign-in; approver and author identities come
   from here.
 - **CDP Uploader** is the platform's file transfer and virus scanning.
 - **External websites** (GOV.UK and others) are link targets the hub
@@ -40,9 +40,9 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-  designer(["Guidance Designer"]):::actor --> ui
-  owner(["Guide Owner"]):::actor --> ui
-  reader(["RPA Staff"]):::actor --> ui
+  designer(["Designer"]):::actor --> ui
+  approver(["Approver"]):::actor --> ui
+  processor(["Processor"]):::actor --> ui
   subgraph hub["RPA AI Guidance Hub"]
     ui["rpa-ai-guidance-hub-ui"]:::svc -->|"JSON/HTTPS"| api["rpa-ai-guidance-hub-api"]:::svc
     api --> mongo[("MongoDB")]:::store
