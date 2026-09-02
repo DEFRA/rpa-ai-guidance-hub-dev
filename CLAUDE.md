@@ -24,6 +24,7 @@ uv run task pull          # git pull each cloned service on its current branch
 uv run task update        # checkout main + pull each cloned service
 uv run task convert       # render data/input/*.docx to Markdown in data/output/
 uv run task audit         # report what that conversion loses, section by section
+uv run task audit --tiptap  # ...and what a load/save in the guidance editor discards
 uv run task view          # view one data/output/*.md rendered by TipTap in the browser
 docker compose up --build # build and run all services + dependencies
 docker compose watch      # as above, plus rebuild on dependency-manifest changes
@@ -55,6 +56,12 @@ document is read with *that* repo's pinned `python-docx` and its real parser; `v
 `scripts/preview-markdown/server.js` in the **UI** repo, so the editor is the one the front end will
 really use. Nothing to do with documents is installed here.
 
+`task audit --tiptap` is the one task that reaches into **both**, and is why that leg is assembled in
+the wrapper rather than inside either script: the document is converted in the API repo, put through
+`scripts/preview-markdown/normalise.js` in the UI repo, and the result handed back to the audit as a
+third input. Only this repository knows where both repos are. The intermediate Markdown goes to a
+temporary directory, so `--tiptap` needs no prior `task convert` and never overwrites `data/output/`.
+
 `task audit` scores what Word renders in each section against the Markdown the parser produces,
 excluding the cover page and contents; `--missing` lists what was dropped. It counts three kinds of
 symbol: **words** and **urls**, which ask whether the document still says what it said, and **marks**,
@@ -65,20 +72,54 @@ the same *number* of bold things. A feature table under the section report break
 its `spurious` column is the half a coverage score cannot show: marks the Markdown wears that Word
 never asked for.
 
-All three documents in `data/input/` currently score 100% on words, urls and marks alike, with nothing
-spurious, so the audit now catches regressions rather than reporting a backlog — re-run it as each parsing feature lands, and treat any
-score below 100% as something the conversion just broke.
+All three documents in `data/input/` score 100% on words and urls with nothing spurious, and 100% on
+marks apart from **one standing loss**: a list inside a table cell. A GFM pipe row cannot hold a
+newline, so `tables` joins a cell's blocks with `<br>` and a bullet becomes a literal hyphen in cell
+text — text that reads like a list and is not one. That costs the CS guide 9% of its `list` marks (12
+cell paragraphs in *Case Management*); SFI23 has no such cell and scores 100%. It is a limitation of
+the target format, not a bug to fix, so treat *any other* score below 100% as something the conversion
+just broke. Only an exact coverage prints `100%`; anything one symbol short prints `99%`, because a
+rounded 100% is how a real loss hides.
+
+The audit used to read those hyphens back as a list and score them 100%, which is the exact failure
+the module docstring warns about — an instrument reading the parser's *intent* rather than the
+Markdown it produced. It only surfaced once `--tiptap` was added and the editor, reading the cell as
+GFM says to, was blamed for discarding a list nobody had written.
+
+`--tiptap` adds a `kept` column beside `covered`, and an `after a TipTap save` row under the totals.
+`covered` is what the parser wrote; `kept` is what survives being loaded and saved by the guidance
+editor's schema, scored against the same Word denominator so the two read side by side. The pair says
+which repository a repair belongs in — a feature at 100% covered and 0% kept was converted correctly
+and then discarded downstream. Both guides currently show exactly that for `underline` and
+`superscript`, which is the documented consequence of `underline: false` in `extensions.js` and of the
+schema having no superscript at all. With `--missing`, a `Discarded by the editor` block lists what
+went — and it is scored against the parser's Markdown, not against Word, so a mark the parser never
+wrote cannot be blamed on the editor. Underline and superscript are the whole of it on both guides:
+no words, no links, no colours, no tables and no line breaks are lost to a save.
 
 `task view` shows a second, different loss: what TipTap's own schema discards. It serves one page
 with the converted Markdown, a line diff of what normalising that Markdown through TipTap changed,
 and a read-only TipTap rendering of it. The toggle above the rendering switches between the original
 Markdown and the round-tripped Markdown, which is how a loss the diff states as text becomes visible
-as a picture — colour survives the first and not the second. It needs Node on the *host* — the only
-task that does — plus `node_modules` in the UI repo; everything else here runs in Docker or through
-`uv`.
+as a picture — colour survives the first and not the second. It needs Node on the *host*, as
+`task audit --tiptap` does, plus `node_modules` in the UI repo; everything else here runs in Docker
+or through `uv`.
 
-**The preview is analysis tooling and is confined to `scripts/` on both sides.** The only change it
-made to the UI repo's application code is the eight `@tiptap/*` entries in `package.json`, added
+The round trip itself lives in `scripts/preview-markdown/roundtrip.js` and is shared by the preview
+page and the audit, deliberately: two copies of "what the editor does to a document" would be two
+copies of the very thing both exist to measure. It builds a detached `Editor` on `EXTENSIONS`, loads
+the Markdown into it and asks for it back — the real editor, not a model of one.
+
+**That is why `jsdom` is a devDependency of the UI repo**, and the whole of what it is for: Tiptap
+builds a ProseMirror view, and a view needs a document to attach to, which node has not. It was
+written without one first — parsing to Tiptap JSON and serialising it back — and that version agreed
+with the real editor about `<u>` and disagreed about `<br>`, reporting every line break in a table as
+a loss no save actually incurs. An audit that measures something other than what `task view` shows is
+worse than no audit, so the dependency is the cheaper of the two costs.
+
+**The preview and the audit's TipTap leg are analysis tooling, confined to `scripts/` on both sides.**
+The only changes either made to the UI repo outside `scripts/` are `package.json` entries: `jsdom` as
+a devDependency, for the reason above, and the eight `@tiptap/*` ones, added
 because the guidance WYSIWYG editor will need them; nothing under `src/` imports them yet, and the
 preview deliberately adds no route, page, client bundle, `vite.config.js` entry or convict key. When
 that editor is built, `scripts/preview-markdown/extensions.js` is the extension list it should start
