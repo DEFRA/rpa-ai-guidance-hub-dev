@@ -106,7 +106,10 @@ no words, no links, no colours, no tables and no line breaks are lost to a save.
 with the converted Markdown, a line diff of what normalising that Markdown through TipTap changed,
 and a read-only TipTap rendering of it. The toggle above the rendering switches between the original
 Markdown and the round-tripped Markdown, which is how a loss the diff states as text becomes visible
-as a picture — colour survives the first and not the second. It needs Node on the *host*, as
+as a picture — colour survives the first and not the second. The splits between the three panes drag
+(and take arrow keys, and reset on a double-click), because which pane needs the room depends on
+whether a wide table, a long diff or the source against the diff is what is being read. It needs Node
+on the *host*, as
 `task audit --tiptap` does, plus `node_modules` in the UI repo; everything else here runs in Docker
 or through `uv`.
 
