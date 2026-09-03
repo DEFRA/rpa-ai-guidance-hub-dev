@@ -76,10 +76,15 @@ All three documents in `data/input/` score 100% on words and urls with nothing s
 marks apart from **one standing loss**: a list inside a table cell. A GFM pipe row cannot hold a
 newline, so `tables` joins a cell's blocks with `<br>` and a bullet becomes a literal hyphen in cell
 text — text that reads like a list and is not one. That costs the CS guide 9% of its `list` marks (12
-cell paragraphs in *Case Management*); SFI23 has no such cell and scores 100%. It is a limitation of
-the target format, not a bug to fix, so treat *any other* score below 100% as something the conversion
-just broke. Only an exact coverage prints `100%`; anything one symbol short prints `99%`, because a
-rounded 100% is how a real loss hides.
+cell paragraphs in *Case Management*); SFI23 has no such cell and scores 100%. The Markdown can say no
+more than that, so treat *any other* score below 100% as something the conversion just broke. Only an
+exact coverage prints `100%`; anything one symbol short prints `99%`, because a rounded 100% is how a
+real loss hides.
+
+The 9% is a fact about the Markdown, not about the editor: `FaithfulTable` reads those hyphens back
+into a real `bulletList`, so the 12 items *are* a list to anyone editing the cell (see `tables.js`).
+It does not move the score and must not — the audit reads the Markdown a plain GFM renderer would
+read, and there the hyphens are still hyphens. The two facts stand together.
 
 The audit used to read those hyphens back as a list and score them 100%, which is the exact failure
 the module docstring warns about — an instrument reading the parser's *intent* rather than the
@@ -109,6 +114,17 @@ The round trip itself lives in `scripts/preview-markdown/roundtrip.js` and is sh
 page and the audit, deliberately: two copies of "what the editor does to a document" would be two
 copies of the very thing both exist to measure. It builds a detached `Editor` on `EXTENSIONS`, loads
 the Markdown into it and asks for it back — the real editor, not a model of one.
+
+`EXTENSIONS` is not stock, and `tables.js` is where it departs most: three corrections to the table
+extension, all of them because a GFM pipe row is one line and a cell is not. The stock renderer pads a
+table with a blank line at each end, so **two adjacent tables grow the document on every save**; it
+welds the blocks of a multi-block cell together, so a cell holding a paragraph and a list saves as
+`Do this:<br>- one- two` with the breaks between the items **silently lost**; and it reads a cell's
+list back as a paragraph wearing hyphens. The middle one is the dangerous one — the damage is
+idempotent, because a wrecked cell is a plain paragraph again on the next read, so the second save
+matches the first and the corruption looks stable. Fixing the read without the render would have
+introduced it. These carry over to the real editor: they are bugs in what a save does to a document,
+not preview conveniences.
 
 **That is why `jsdom` is a devDependency of the UI repo**, and the whole of what it is for: Tiptap
 builds a ProseMirror view, and a view needs a document to attach to, which node has not. It was
