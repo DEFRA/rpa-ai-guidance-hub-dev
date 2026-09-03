@@ -1,6 +1,6 @@
 services:
   cdp-uploader:
-    image: defradigital/cdp-uploader@sha256:eb1627b60690ec24d41a17ed82e80c28d009aaaeb19dc179c6a3887da7e6a5bd
+    image: defradigital/cdp-uploader@sha256:4749a2ff6ddd34ccdc2caf63afaac1f26f3b8f0dcfd775eb36511725f39deedd
     ports:
       - '7337:7337'
     links:
