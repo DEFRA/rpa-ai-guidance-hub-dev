@@ -66,23 +66,34 @@ temporary directory, so `--tiptap` needs no prior `task convert` and never overw
 excluding the cover page and contents; `--missing` lists what was dropped. It counts three kinds of
 symbol: **words** and **urls**, which ask whether the document still says what it said, and **marks**,
 which ask whether it still looks how it looked. A mark is one word wearing one feature — bold, italic,
-underline, strikethrough, superscript, subscript, red, blue, link, list, numbered, table, box, image —
-so the conversion earns its score only by marking up the same text the document does, not by producing
-the same *number* of bold things. A feature table under the section report breaks the marks down, and
-its `spurious` column is the half a coverage score cannot show: marks the Markdown wears that Word
-never asked for.
+underline, strikethrough, superscript, subscript, red, blue, link, list, numbered, list_indent,
+list_outdent, table, box, image — so the conversion earns its score only by marking up the same text
+the document does, not by producing the same *number* of bold things. A feature table under the
+section report breaks the marks down, and its `spurious` column is the half a coverage score cannot
+show: marks the Markdown wears that Word never asked for.
 
-All three documents in `data/input/` score 100% on words and urls with nothing spurious, and 100% on
-marks apart from **one standing loss**: a list inside a table cell. A GFM pipe row cannot hold a
-newline, so `tables` joins a cell's blocks with `<br>` and a bullet becomes a literal hyphen in cell
-text — text that reads like a list and is not one. That costs the CS guide 9% of its `list` marks (12
-cell paragraphs in *Case Management*); SFI23 has no such cell and scores 100%. The Markdown can say no
-more than that, so treat *any other* score below 100% as something the conversion just broke. Only an
-exact coverage prints `100%`; anything one symbol short prints `99%`, because a rounded 100% is how a
-real loss hides.
+**A score below 100% means something a repair could put right.** That is the whole intent: the audit
+exists to show where the page and what the viewer renders differ *and somebody can go and fix it*. A
+loss the format makes unavoidable is therefore held out of the marks entirely and reported by name
+under **Known limits of the format** in `--missing`, with the reason. Left in a coverage column it
+would read as a fault nobody can repair, sitting in the same column as the ones that are real — the
+one place it must not be. Held out is not dropped: every one is counted and named there. Only an exact
+coverage prints `100%`; anything one symbol short prints `99%`, because a rounded 100% is how a real
+loss hides.
 
-The 9% is a fact about the Markdown, not about the editor: `FaithfulTable` reads those hyphens back
-into a real `bulletList`, so the 12 items *are* a list to anyone editing the cell (see `tables.js`).
+There are two known limits, both about lists:
+
+- **A list inside a table cell.** A GFM pipe row cannot hold a newline, so `tables` joins a cell's
+  blocks with `<br>` and a bullet becomes a literal hyphen in cell text — text that reads like a list
+  and is not one. It costs the CS guide 250 marks, ED1 43 and Evidence Required 50.
+- **A step out past where its list begins.** A Markdown list starts at its first item's column and has
+  none to the left of it, so every item at or left of that is drawn at the margin and a step between
+  two of them is a step between two items drawn in the same place. It is the item being *left* that
+  decides, not the item arriving: leaving one drawn deeper than the run began, Markdown has an indent
+  to bring back and draws the step however far left it lands.
+
+The cell limit is a fact about the Markdown, not about the editor: `FaithfulTable` reads those hyphens
+back into a real `bulletList`, so the items *are* a list to anyone editing the cell (see `tables.js`).
 It does not move the score and must not — the audit reads the Markdown a plain GFM renderer would
 read, and there the hyphens are still hyphens. The two facts stand together.
 
@@ -90,6 +101,25 @@ The audit used to read those hyphens back as a list and score them 100%, which i
 the module docstring warns about — an instrument reading the parser's *intent* rather than the
 Markdown it produced. It only surfaced once `--tiptap` was added and the editor, reading the cell as
 GFM says to, was blamed for discarding a list nobody had written.
+
+`list_indent` and `list_outdent` are what one item did relative to the item before it — stepped in,
+stepped out — and are the only way the two sides can speak about depth at all. Word measures a level
+in twips and Markdown in columns, and both sides read depth relatively, so no absolute level on one
+names the same thing as a level on the other.
+
+**Neither side ends a list run at a paragraph between two items.** Word goes on drawing the items
+after one at the level they were at, and a reader reads them there, so ending the run would throw away
+the one thing the page says about how they sit. The parser matches: prose interrupting a run is held
+rather than filed, and where the item after it is drawn further right than the run *began*, the prose
+becomes a block of the item it follows and the sub-list nests inside it. Measured against the item
+just before it instead of against the run's start, the Markdown steps back to the margin where the
+page holds its level — a hundred and forty spurious steps across the guides. The prose has to move
+into the item to keep any of it: at the first column it would end the list. That is the smaller of the
+two losses and the only shape Markdown has for the larger one.
+
+Eleven of the nineteen guides score 100% on every feature. The rest are real work, and all of it is in
+the two step marks — `list_indent` as low as 69% in *Changes Required*, `list_outdent` as low as 47%
+in *Existing MTA* — bar *Organic Status Error*, which also loses words and a `box`.
 
 `--tiptap` adds a `kept` column beside `covered`, and an `after a TipTap save` row under the totals.
 `covered` is what the parser wrote; `kept` is what survives being loaded and saved by the guidance
