@@ -119,7 +119,7 @@ two losses and the only shape Markdown has for the larger one.
 
 Eleven of the nineteen guides score 100% on every feature. The rest are real work, and all of it is in
 the two step marks — `list_indent` as low as 69% in *Changes Required*, `list_outdent` as low as 47%
-in *Existing MTA* — bar *Organic Status Error*, which also loses words and a `box`.
+in *Existing MTA*. No guide loses a word, and only *Admin Evidence Check* loses a URL.
 
 `--tiptap` adds a `kept` column beside `covered`, and an `after a TipTap save` row under the totals.
 `covered` is what the parser wrote; `kept` is what survives being loaded and saved by the guidance
