@@ -85,7 +85,8 @@ There is one known limit:
 
 - **A list inside a table cell.** A GFM pipe row cannot hold a newline, so `tables` joins a cell's
   blocks with `<br>` and a bullet becomes a literal hyphen in cell text — text that reads like a list
-  and is not one. It costs the CS guide 250 marks, ED1 43 and Evidence Required 50.
+  and is not one. It costs *Supervisory Checks Guidance* 898 marks, *Final Payment Case Check* 762,
+  the CS guide 250, *Evidence Required* 50 and ED1 43.
 
 There used to be a second, *a step out past where its list begins*, and it went when depth stopped
 being read off the columns alone. Under the reading below, an item drawn left of every depth the run
@@ -132,7 +133,9 @@ things about an item, in this order:
 
 Glyph-first was measured and rejected: ranking every item by its bullet alone moves 312 of the 1,389
 items and files a `•` answer as a sibling of the `o` question it answers, six times in *Revenue
-Option* alone. The three rules above move 112, all in the direction the page reads.
+Option* alone. The three rules above move 112, all in the direction the page reads. Those counts, and
+the hollow-bullet ones above, were taken on the nineteen guides the corpus held when the rule was
+written; the three added since are scored by it but are not in the totals.
 
 **A run ends at a paragraph between two items only where the item after it says so.** Where that item
 is drawn further right than the run *began*, the prose is a sub-list's unbulleted lead-in: Word goes
@@ -148,7 +151,38 @@ the run at one reopened the items after it at the margin, throwing away every st
 between them. On the Markdown side an indented `>` is read as a box inside its item and does not end
 the run either.
 
-**Every one of the nineteen guides now scores 100% on words, on marks, and on all sixteen features.**
+**Word draws a box three ways and means the same thing by all of them**, so all three become a
+blockquote. Two arrive as a container whose children are the box's blocks — the `w:tc` of a one-cell
+table, the `w:txbxContent` of a text box — and `tables` and `textboxes` render those. The third has no
+container at all: the author borders a run of ordinary body paragraphs, and the box exists only in
+that the paragraphs sharing it are adjacent. `borders` assembles that run and hands it to the same
+`_take_box`; `tables.blocks` and `tables.quote` are the two halves of `callout`, made public for it.
+
+It is the form the guides reach for whenever they quote something the reader is to **copy rather than
+follow** — a case note to paste, an email to send, a proforma comment — and the border is the only
+thing separating the quoted text from the guidance resuming underneath it. Without it, "Contact the
+processor and tell them the outcome" reads as the last line of the case note it follows. There are 21
+such runs across ten of the twenty-two guides, 114 paragraphs and 1,622 marks; before they were read,
+both sides ignored them alike and the loss scored 100%.
+
+**A run of bordered paragraphs is one box only while the border stays the same**
+(`borders.signature`). Word grows a single frame down consecutive paragraphs while their border
+properties match exactly and starts another the moment anything differs — a difference that renders
+the same included, `w:color="auto"` against an explicit black. That looks like a distinction without
+meaning and is not: it is the whole of what separates an email template's subject box from the box
+holding its body, and a case note's `HOLD806` line from its fields. Two boxes on the page are two
+blockquotes with a blank line between them, and TipTap keeps them apart across a save. It costs the
+score nothing either way — `box` is a mark a word wears, and the same words wear it — so the audit
+reads the same rule for the sake of the page rather than the number.
+
+**Only a border on all four sides, and only direct formatting.** One side is a rule and not a box —
+Word's own `Title` style underlines itself with a bottom border, and a style is where a decorative
+rule is declared. A side present but set to `none` is a declared absence rather than a line. A
+bordered *heading* is emphasis and never part of a box: taken into one it would stop opening its
+section, and every word under it would go missing from the Word side alone — which reads as marks the
+parser invented. A border inside a table cell is ignored on both sides; there are none.
+
+**Every one of the twenty-two guides now scores 100% on words, on marks, and on all sixteen features.**
 The only two blemishes left in the corpus are *Admin Evidence Check* at 98% on urls — one SharePoint
 address, entity-encoded — and three spurious `bold` marks in *Existing MTA*. Both pre-date this rule.
 
