@@ -10,8 +10,9 @@ Local development support for running / developing the RPA AI Guidance Hub local
 - uv - [Installation Guide](https://docs.astral.sh/uv/getting-started/installation/#installing-uv)
 - Python 3.13 or higher - We recommend using uv to manage your Python environment.
 - Git
-- Node.js 24 or higher - only for `uv run task view`, which is the one script that runs on the
-  host rather than in Docker. [Installation Guide](https://nodejs.org/en/download)
+- Node.js 24 or higher - only for `uv run task audit` and `uv run task view`, the two scripts
+  that run on the host rather than in Docker because they run the guidance editor.
+  [Installation Guide](https://nodejs.org/en/download)
 
 ## Repositories
 
@@ -168,6 +169,32 @@ Switches to and pulls the latest main branch for each microservice.
 
 ```bash
 uv run task update
+```
+
+### Convert
+
+Renders Word guidance documents to Markdown with the API repository's own parser, writing
+`data/output/<name>.md` and any images to `data/output/<name>-images/`. A `.docx` is looked up in
+`data/input/` when it is not a path that exists. Nothing document-related is installed here: the
+parse runs in the repository that owns it, so what comes out is what the application would produce.
+
+```bash
+uv run task convert "<document>.docx"     # or several; or one .docx and one .md output path
+```
+
+### Audit
+
+Reports what a conversion loses, section by section, and then what the guidance editor discards
+when the result is loaded and saved again. Each document is read twice -- once directly for what
+Word puts on the page, once through the parser -- and scored on three things: words and URLs, for
+whether it still says what it said, and marks, for whether it still looks how it looked.
+
+There are no switches to remember: every leg is scored and everything lost is named. `--top` sets
+how many missing words to list per section. Requires Node.js and the UI repository's dependencies
+(`npm --prefix repos/rpa-ai-guidance-hub-ui install`), because the editor leg runs the real editor.
+
+```bash
+uv run task audit "<document>.docx"       # or several
 ```
 
 ### View
