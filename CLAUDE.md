@@ -23,8 +23,7 @@ uv run task clone         # clone every service into ./repos/ (skips existing)
 uv run task pull          # git pull each cloned service on its current branch
 uv run task update        # checkout main + pull each cloned service
 uv run task convert       # render data/input/*.docx to Markdown in data/output/
-uv run task audit         # report what that conversion loses, section by section
-uv run task audit --tiptap  # ...and what a load/save in the guidance editor discards
+uv run task audit         # report what that conversion loses, and what a save then discards
 uv run task view          # view one data/output/*.md rendered by TipTap in the browser
 docker compose up --build # build and run all services + dependencies
 docker compose watch      # as above, plus rebuild on dependency-manifest changes
@@ -56,14 +55,22 @@ document is read with *that* repo's pinned `python-docx` and its real parser; `v
 `scripts/preview-markdown/server.js` in the **UI** repo, so the editor is the one the front end will
 really use. Nothing to do with documents is installed here.
 
-`task audit --tiptap` is the one task that reaches into **both**, and is why that leg is assembled in
+`task audit` is the one task that reaches into **both**, and is why that leg is assembled in
 the wrapper rather than inside either script: the document is converted in the API repo, put through
 `scripts/preview-markdown/normalise.js` in the UI repo, and the result handed back to the audit as a
 third input. Only this repository knows where both repos are. The intermediate Markdown goes to a
-temporary directory, so `--tiptap` needs no prior `task convert` and never overwrites `data/output/`.
+temporary directory, so the audit needs no prior `task convert` and never overwrites `data/output/`.
+It is why `task audit` needs Node on the host and `node_modules` in the UI repo, where `task convert`
+needs neither.
+
+The audit has no switches but `--top`: every leg is always scored and everything lost is always
+named, because a score says where to look and the list says what to look at, and half an instrument
+is worse than none. `scripts/audit_docx.py` in the API repo keeps `--tiptap FILE` as an option rather
+than a flag — it takes the round trip the wrapper made, and without it the first two legs are
+reported alone, which is what lets that script audit any document with nothing but python-docx.
 
 `task audit` scores what Word renders in each section against the Markdown the parser produces,
-excluding the cover page and contents; `--missing` lists what was dropped. It counts three kinds of
+excluding the cover page and contents, and lists what was dropped. It counts three kinds of
 symbol: **words** and **urls**, which ask whether the document still says what it said, and **marks**,
 which ask whether it still looks how it looked. A mark is one word wearing one feature — bold, italic,
 underline, strikethrough, superscript, subscript, red, blue, link, list, numbered, list_indent,
@@ -75,7 +82,7 @@ show: marks the Markdown wears that Word never asked for.
 **A score below 100% means something a repair could put right.** That is the whole intent: the audit
 exists to show where the page and what the viewer renders differ *and somebody can go and fix it*. A
 loss the format makes unavoidable is therefore held out of the marks entirely and reported by name
-under **Known limits of the format** in `--missing`, with the reason. Left in a coverage column it
+under **Known limits of the format**, with the reason. Left in a coverage column it
 would read as a fault nobody can repair, sitting in the same column as the ones that are real — the
 one place it must not be. Held out is not dropped: every one is counted and named there. Only an exact
 coverage prints `100%`; anything one symbol short prints `99%`, because a rounded 100% is how a real
@@ -100,7 +107,7 @@ read, and there the hyphens are still hyphens. The two facts stand together.
 
 The audit used to read those hyphens back as a list and score them 100%, which is the exact failure
 the module docstring warns about — an instrument reading the parser's *intent* rather than the
-Markdown it produced. It only surfaced once `--tiptap` was added and the editor, reading the cell as
+Markdown it produced. It only surfaced once the editor leg was added and the editor, reading the cell as
 GFM says to, was blamed for discarding a list nobody had written.
 
 `list_indent` and `list_outdent` are what one item did relative to the item before it — stepped in,
@@ -186,13 +193,13 @@ parser invented. A border inside a table cell is ignored on both sides; there ar
 The only two blemishes left in the corpus are *Admin Evidence Check* at 98% on urls — one SharePoint
 address, entity-encoded — and three spurious `bold` marks in *Existing MTA*. Both pre-date this rule.
 
-`--tiptap` adds a `kept` column beside `covered`, and an `after a TipTap save` row under the totals.
+The editor leg adds a `kept` column beside `covered`, and an `after a TipTap save` row under the totals.
 `covered` is what the parser wrote; `kept` is what survives being loaded and saved by the guidance
 editor's schema, scored against the same Word denominator so the two read side by side. The pair says
 which repository a repair belongs in — a feature at 100% covered and 0% kept was converted correctly
 and then discarded downstream. Both guides currently show exactly that for `underline` and
 `superscript`, which is the documented consequence of `underline: false` in `extensions.js` and of the
-schema having no superscript at all. With `--missing`, a `Discarded by the editor` block lists what
+schema having no superscript at all. A `Discarded by the editor` block lists what
 went — and it is scored against the parser's Markdown, not against Word, so a mark the parser never
 wrote cannot be blamed on the editor. Underline and superscript are the whole of it on both guides:
 no words, no links, no colours, no tables and no line breaks are lost to a save.
@@ -204,9 +211,8 @@ Markdown and the round-tripped Markdown, which is how a loss the diff states as 
 as a picture — colour survives the first and not the second. The splits between the three panes drag
 (and take arrow keys, and reset on a double-click), because which pane needs the room depends on
 whether a wide table, a long diff or the source against the diff is what is being read. It needs Node
-on the *host*, as
-`task audit --tiptap` does, plus `node_modules` in the UI repo; everything else here runs in Docker
-or through `uv`.
+on the *host*, as `task audit` does, plus `node_modules` in the UI repo; everything else here runs in
+Docker or through `uv`.
 
 The round trip itself lives in `scripts/preview-markdown/roundtrip.js` and is shared by the preview
 page and the audit, deliberately: two copies of "what the editor does to a document" would be two

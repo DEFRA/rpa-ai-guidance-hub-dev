@@ -15,23 +15,24 @@ counts the marks the Markdown wears that the document never asked for.
 The cover page and the table of contents are excluded: the audit starts at the
 first body heading.
 
-``--tiptap`` adds a third leg, and is the reason this wrapper exists rather than the
+Everything lost is named as well as counted: the report ends with the words, URLs
+and marks that never reached the Markdown, and with what the editor then discarded.
+
+A third leg is always scored, and is the reason this wrapper exists rather than the
 API script being run directly: the document is converted in the API repository, put
 through the guidance editor's own schema in the UI repository, and only then audited.
-Only this repository knows where both live. It needs Node on the host.
+Only this repository knows where both live. It needs Node on the host, and the UI
+repository's node_modules installed.
 
 Usage:
-  uv run python scripts/audit_doc.py <document.docx>... [--tiptap] [--missing]
-      [--top N]
+  uv run python scripts/audit_doc.py <document.docx>... [--top N]
 
 A .docx is looked up in data/input/ when it is not a path that exists. Nothing is
 written: the report goes to the console.
 
 Examples:
   uv run task audit guide.docx
-  uv run task audit guide.docx --missing
-  uv run task audit guide.docx --tiptap
-  uv run task audit guide.docx --tiptap --missing
+  uv run task audit guide.docx --top 40
   uv run task audit one.docx two.docx three.docx
 """
 
@@ -51,9 +52,9 @@ from docx_tools import (
 
 AUDIT_SCRIPT = "scripts/audit_docx.py"
 
-# The two scripts the --tiptap leg needs, one in each service repository: the
-# parser writes the Markdown the API would store, and the editor's own schema says
-# what survives being loaded and saved again.
+# The two scripts the editor leg needs, one in each service repository: the parser
+# writes the Markdown the API would store, and the editor's own schema says what
+# survives being loaded and saved again.
 PARSE_SCRIPT = "scripts/parse_docx.py"
 NORMALISE_SCRIPT = "scripts/preview-markdown/normalise.js"
 
@@ -70,33 +71,12 @@ def parse_args() -> argparse.Namespace:
         help=f"One or more .docx documents, by path or by name in {INPUT_DIR}.",
     )
     parser.add_argument(
-        "--missing",
-        action="store_true",
-        help="List the words, URLs and marks that never reached the Markdown.",
-    )
-    parser.add_argument(
-        "--tiptap",
-        action="store_true",
-        help=(
-            "Also score what a load/save round trip through the guidance editor "
-            "discards, using the UI repository's own TipTap schema."
-        ),
-    )
-    parser.add_argument(
         "--top",
         type=int,
         default=None,
         help="How many missing words to list per section.",
     )
     return parser.parse_args()
-
-
-def options(args: argparse.Namespace) -> list[str]:
-    """The flags to pass straight through to the audit itself."""
-    flags = ["--missing"] if args.missing else []
-    if args.top is not None:
-        flags += ["--top", str(args.top)]
-    return flags
 
 
 def round_tripped(uv: str, node: str, document: Path, workspace: Path) -> Path:
@@ -109,7 +89,7 @@ def round_tripped(uv: str, node: str, document: Path, workspace: Path) -> Path:
 
     The intermediate Markdown is written to a scratch directory rather than to
     data/output/, so auditing never quietly overwrites a conversion someone is
-    looking at -- and so `--tiptap` needs no prior `task convert`.
+    looking at -- and so an audit needs no prior `task convert`.
     """
     converted = workspace / f"{document.stem}.md"
     normalised = workspace / f"{document.stem}.tiptap.md"
@@ -123,24 +103,22 @@ def main() -> int:
     args = parse_args()
 
     documents = [resolve_input(name) for name in args.documents]
-    flags = options(args)
+    flags = [] if args.top is None else ["--top", str(args.top)]
 
     # Resolved once, and before any work starts, so a missing tool is reported
     # immediately rather than after the first document has been audited.
     uv = resolve_uv()
-    node = resolve_node() if args.tiptap else ""
+    node = resolve_node()
 
     failures: list[str] = []
     with tempfile.TemporaryDirectory(prefix="audit-tiptap-") as scratch:
         workspace = Path(scratch)
         for document in documents:
             try:
-                leg = (
-                    ["--tiptap", str(round_tripped(uv, node, document, workspace))]
-                    if args.tiptap
-                    else []
+                leg = str(round_tripped(uv, node, document, workspace))
+                run_in_api_repo(
+                    uv, AUDIT_SCRIPT, [str(document), "--tiptap", leg, *flags]
                 )
-                run_in_api_repo(uv, AUDIT_SCRIPT, [str(document), *leg, *flags])
             except (OSError, RuntimeError) as error:
                 # One bad document must not abandon the rest of a batch.
                 print(f"FAILED {document.name}: {error}", file=sys.stderr)
