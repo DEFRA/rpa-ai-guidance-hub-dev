@@ -38,7 +38,8 @@ sequenceDiagram
   UI->>API: POST /guidance/from-upload { uploadId, guidance_id?, metadata }
   API->>CU: GET /status/{uploadId}  (verify scan clean, get S3 location)
   API->>DB: create guidance (if new) + guidance_version  ← the GUID lands here
-  API->>S3: tag original with guidance_id (no move); write markdown + images to content bucket
+  API->>S3: tag original with guidance_id (no move)
+  API->>S3: write markdown and images to content bucket
   API->>API: convert → status → ready
   loop convert phase
     UI->>API: GET /guidance/versions/{vid}/status
