@@ -40,11 +40,14 @@ import argparse
 import sys
 import tempfile
 from pathlib import Path
+from urllib.parse import urlsplit
+from urllib.request import url2pathname
 
 from docx_tools import (
     INPUT_DIR,
     resolve_input,
     resolve_node,
+    resolve_ui_script,
     resolve_uv,
     run_in_api_repo,
     run_in_ui_repo,
@@ -87,14 +90,18 @@ def round_tripped(uv: str, node: str, document: Path, workspace: Path) -> Path:
     editor needs the UI repository's node_modules. This is the only place that knows
     both, which is why the leg is assembled here rather than inside either script.
 
-    The intermediate Markdown is written to a scratch directory rather than to
-    data/output/, so auditing never quietly overwrites a conversion someone is
-    looking at -- and so an audit needs no prior `task convert`.
+    The guide is stored in a scratch directory rather than in data/output/, so
+    auditing never quietly overwrites a conversion someone is looking at -- and so an
+    audit needs no prior `task convert`. Where the parser put it comes back from the
+    parser: the store owns that layout, and this repository cannot import it.
     """
-    converted = workspace / f"{document.stem}.md"
     normalised = workspace / f"{document.stem}.tiptap.md"
 
-    run_in_api_repo(uv, PARSE_SCRIPT, [str(document), str(converted)])
+    stored = run_in_api_repo(
+        uv, PARSE_SCRIPT, [str(document), str(workspace)], capture=True
+    )
+    converted = Path(url2pathname(urlsplit(stored).path))
+
     run_in_ui_repo(node, NORMALISE_SCRIPT, [str(converted), str(normalised)])
     return normalised
 
@@ -106,9 +113,12 @@ def main() -> int:
     flags = [] if args.top is None else ["--top", str(args.top)]
 
     # Resolved once, and before any work starts, so a missing tool is reported
-    # immediately rather than after the first document has been audited.
+    # immediately rather than after the first document has been audited. The UI
+    # script is checked here for the same reason: it runs second, so without this
+    # the first document would be converted before anything noticed it was absent.
     uv = resolve_uv()
     node = resolve_node()
+    resolve_ui_script(NORMALISE_SCRIPT)
 
     failures: list[str] = []
     with tempfile.TemporaryDirectory(prefix="audit-tiptap-") as scratch:

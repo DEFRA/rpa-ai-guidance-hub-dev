@@ -11,6 +11,7 @@ a child process is launched is made once.
 import os
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -60,6 +61,17 @@ def resolve_input(name: str) -> Path:
     raise SystemExit(message)
 
 
+def stored_markdown(guide: Path) -> Path:
+    """The Markdown file inside a stored guide.
+
+    The one thing this repository has to know about the store's layout, because
+    finding a guide someone converted earlier is a lookup and there is no child
+    process to ask. Everything else about where a guide goes is answered by the
+    script that put it there.
+    """
+    return guide / "content.md"
+
+
 def resolve_markdown(name: str) -> Path:
     """Resolve a document argument to a readable .md, or fail with advice.
 
@@ -73,7 +85,7 @@ def resolve_markdown(name: str) -> Path:
     given = Path(name)
 
     if given.suffix.lower() == ".docx":
-        converted = OUTPUT_DIR / f"{given.stem}.md"
+        converted = stored_markdown(OUTPUT_DIR / given.stem)
         if converted.is_file():
             return converted.resolve()
 
@@ -106,12 +118,67 @@ def resolve_markdown(name: str) -> Path:
     raise SystemExit(message)
 
 
-def run_in_api_repo(uv: str, script: str, arguments: list[str]) -> None:
+def on_branch(repo: Path) -> str:
+    """Which branch `repo` is on, as a phrase to append, or "" if it cannot say.
+
+    Only ever used to make a failure easier to read, so it answers "" rather than
+    raising for anything it cannot work out: a diagnosis that fails to be produced
+    must not replace the fault it was diagnosing.
+    """
+    try:
+        result = subprocess.run(  # noqa: S603 - fixed argv, no shell
+            ["git", "-C", str(repo), "rev-parse", "--abbrev-ref", "HEAD"],  # noqa: S607
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError:
+        return ""
+
+    branch = result.stdout.strip()
+    return f", which is on branch {branch}" if result.returncode == 0 and branch else ""
+
+
+def resolve_ui_script(script: str) -> None:
+    """Check the UI repository can run `script`, or fail with advice.
+
+    Separate from `run_in_ui_repo` so that a caller can ask before it starts work:
+    both legs of an audit are wasted if the second one was never going to run, and
+    a batch should say so before it converts the first document rather than after.
+    The runner asks again, so the guard cannot be skipped by forgetting to.
+    """
+    if not (UI_REPO / script).is_file():
+        message = (
+            f"The UI repository has no {script}\n"
+            f"Looked in {UI_REPO}{on_branch(UI_REPO)}.\n"
+            f"That tooling lives on the branch that owns it, so check the "
+            f"repository is on the right one and up to date."
+        )
+        raise SystemExit(message)
+
+    if not (UI_REPO / "node_modules").is_dir():
+        message = (
+            f"The UI repository has no node_modules: {UI_REPO}\n"
+            f"Install its dependencies first with: "
+            f"npm --prefix {UI_REPO} install"
+        )
+        raise SystemExit(message)
+
+
+def run_in_api_repo(
+    uv: str, script: str, arguments: list[str], *, capture: bool = False
+) -> str:
     """Run one of the API repository's scripts there, in its own environment.
 
     Every path handed on must already be absolute: the child runs with its working
     directory set to the API repository, where a relative path would mean somewhere
     else entirely.
+
+    `capture` returns the script's stdout instead of letting it through, which is how
+    a caller learns where a guide was stored: the store owns that layout, and a
+    wrapper working it out for itself would be a second statement of it in a
+    repository that cannot even import the first. Progress still goes to stderr, so
+    it is unaffected either way.
 
     Raises:
         RuntimeError: if the script exits non-zero.
@@ -125,11 +192,17 @@ def run_in_api_repo(uv: str, script: str, arguments: list[str]) -> None:
     result = subprocess.run(  # noqa: S603 - fixed argv, no shell
         [uv, "run", "--directory", str(API_REPO), script, *arguments],
         env=env,
+        capture_output=capture,
+        text=capture,
         check=False,
     )
     if result.returncode != 0:
+        if capture and result.stderr:
+            print(result.stderr, file=sys.stderr)
         message = f"{script} exited {result.returncode}"
         raise RuntimeError(message)
+
+    return result.stdout.strip() if capture else ""
 
 
 def run_in_ui_repo(node: str, script: str, arguments: list[str]) -> None:
@@ -144,13 +217,7 @@ def run_in_ui_repo(node: str, script: str, arguments: list[str]) -> None:
     Raises:
         RuntimeError: if the script exits non-zero.
     """
-    if not (UI_REPO / "node_modules").is_dir():
-        message = (
-            f"The UI repository has no node_modules: {UI_REPO}\n"
-            f"Install its dependencies first with: "
-            f"npm --prefix {UI_REPO} install"
-        )
-        raise SystemExit(message)
+    resolve_ui_script(script)
 
     result = subprocess.run(  # noqa: S603 - fixed argv, no shell
         [node, script, *arguments],
