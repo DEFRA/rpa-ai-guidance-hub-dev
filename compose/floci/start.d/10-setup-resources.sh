@@ -9,17 +9,17 @@
 # yet; the bucket exists so the upload flow has somewhere to land.
 aws s3 mb --endpoint-url=http://localhost:4566 s3://rpa-ai-guidance-hub-source-docs || true
 
-# One Markdown file per converted document, written to the same key each time it is
-# converted — so the bucket's versions of that key are the document's history.
-aws s3 mb --endpoint-url=http://localhost:4566 s3://rpa-ai-guidance-hub-managed-docs || true
-aws s3api put-bucket-versioning --endpoint-url=http://localhost:4566 \
-  --bucket rpa-ai-guidance-hub-managed-docs \
-  --versioning-configuration Status=Enabled || true
-
-# The pictures those documents draw. Deliberately not versioned: an asset is named
-# the digest of its own bytes, so it is never written twice with anything different
-# and there is no history for versioning to keep.
-aws s3 mb --endpoint-url=http://localhost:4566 s3://rpa-ai-guidance-hub-managed-doc-assets || true
+# Converted documents and the pictures they draw, laid out so that every version of
+# a document shares one set of pictures:
+#
+#   <document id>/assets/<digest>.<ext>
+#   <document id>/<version id>/content.md
+#
+# Deliberately not versioned. A version is a key of its own rather than a revision of
+# one, so the bucket has no history to keep: what an object-store version would have
+# recorded is a row in the document_versions collection instead, where it can be
+# queried, attributed and ordered.
+aws s3 mb --endpoint-url=http://localhost:4566 s3://rpa-ai-guidance-hub-docs || true
 
 # SQS queues
 #aws sqs create-queue --endpoint-url=http://localhost:4566 --queue-name my-queue || true
