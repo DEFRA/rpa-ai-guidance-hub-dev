@@ -26,10 +26,12 @@ services:
       MONGO_URI: mongodb://mongodb:27017/
       FLOCI_ENDPOINT_URL: http://floci:4566
       AWS_ENDPOINT_URL: http://floci:4566
-      # Where cdp-uploader deposits scanned documents. Not consumed yet —
-      # AppConfig has no matching field, and its env source only reads
-      # declared ones, so this sits in the environment until one is added.
+      # Where cdp-uploader deposits scanned documents.
       SOURCE_DOCS_S3_BUCKET: ${SOURCE_DOCS_S3_BUCKET:-rpa-ai-guidance-hub-source-docs}
+      # Where a converted document and the pictures it draws are stored. Created by
+      # compose/floci/start.d/10-setup-resources.sh, and not versioned: a version is
+      # a key of its own, recorded in the document_versions collection.
+      DOCS_S3_BUCKET: ${DOCS_S3_BUCKET:-rpa-ai-guidance-hub-docs}
       # AppConfig has no default for this and refuses to start without it.
       CLAUDE_SONNET_MODEL_CONFIG: ${CLAUDE_SONNET_MODEL_CONFIG:-anthropic.claude-sonnet-4-6,arn:aws:bedrock:eu-west-2:123456789012:application-inference-profile/fake-profile-local}
     volumes:

@@ -61,15 +61,15 @@ def resolve_input(name: str) -> Path:
     raise SystemExit(message)
 
 
-def stored_markdown(guide: Path) -> Path:
-    """The Markdown file inside a stored guide.
+def stored_markdown(document: Path) -> Path:
+    """The Markdown file inside a stored document.
 
     The one thing this repository has to know about the store's layout, because
-    finding a guide someone converted earlier is a lookup and there is no child
-    process to ask. Everything else about where a guide goes is answered by the
+    finding a document someone converted earlier is a lookup and there is no child
+    process to ask. Everything else about where a document goes is answered by the
     script that put it there.
     """
-    return guide / "content.md"
+    return document / "content.md"
 
 
 def resolve_markdown(name: str) -> Path:
@@ -175,7 +175,7 @@ def run_in_api_repo(
     else entirely.
 
     `capture` returns the script's stdout instead of letting it through, which is how
-    a caller learns where a guide was stored: the store owns that layout, and a
+    a caller learns where a document was stored: the store owns that layout, and a
     wrapper working it out for itself would be a second statement of it in a
     repository that cannot even import the first. Progress still goes to stderr, so
     it is unaffected either way.
