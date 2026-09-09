@@ -10,6 +10,9 @@ Local development support for running / developing the RPA AI Guidance Hub local
 - uv - [Installation Guide](https://docs.astral.sh/uv/getting-started/installation/#installing-uv)
 - Python 3.13 or higher - We recommend using uv to manage your Python environment.
 - Git
+- Node.js 24 or higher - only for `uv run task audit` and `uv run task view`, the two scripts
+  that run on the host rather than in Docker because they run the guidance editor.
+  [Installation Guide](https://nodejs.org/en/download)
 
 ## Repositories
 
@@ -53,12 +56,19 @@ An example is provided at `.env.example`:
 cp .env.example .env
 ```
 
-`.env` is optional — the compose files supply working defaults for every variable, so the stack starts without it. Create one when you need real values (notably a real Bedrock inference profile in `CLAUDE_SONNET_MODEL_CONFIG`).
+`.env` is *mostly* optional — the compose files supply working defaults for every variable they
+set, so floci, mongodb, redis, cdp-uploader and the API all come up without one. The **UI does
+not**: it needs `SESSION_COOKIE_PASSWORD` or it exits with
+`session.cookie.password: must be of type String`. Set that (and `AUTH_PROVIDER=local` unless you
+have real Entra credentials) before `docker compose up`, plus a real Bedrock inference profile in
+`CLAUDE_SONNET_MODEL_CONFIG` if you want to exercise the LLM.
 
 Note that `.env` holds *host*-oriented endpoints, for running a service directly on your machine against dockerised dependencies. The compose files hard-set the container-oriented equivalents over the top.
 
 | Variable | Default | Required | Description |
 |---|---|:---:|---|
+| SESSION_COOKIE_PASSWORD | _(none)_ | **Yes** | UI session cookie password, 32+ chars (`openssl rand -base64 32`). The UI will not start without it |
+| AUTH_PROVIDER | entra | No | `local` for a development login; `entra` additionally needs the `ENTRA_*` variables |
 | AWS_REGION | eu-west-2 | No | Primary AWS region used by services |
 | AWS_DEFAULT_REGION | eu-west-2 | No | Fallback AWS region environment variable |
 | AWS_ACCESS_KEY_ID | test | No | AWS access key (use local/test credentials for local dev) |
@@ -160,3 +170,47 @@ Switches to and pulls the latest main branch for each microservice.
 ```bash
 uv run task update
 ```
+
+### Convert
+
+Renders Word guidance documents to Markdown with the API repository's own parser, writing
+`data/output/<name>.md` and any images to `data/output/<name>-images/`. A `.docx` is looked up in
+`data/input/` when it is not a path that exists. Nothing document-related is installed here: the
+parse runs in the repository that owns it, so what comes out is what the application would produce.
+
+```bash
+uv run task convert "<document>.docx"     # or several; or one .docx and one .md output path
+```
+
+### Audit
+
+Reports what a conversion loses, section by section, and then what the guidance editor discards
+when the result is loaded and saved again. Each document is read twice -- once directly for what
+Word puts on the page, once through the parser -- and scored on three things: words and URLs, for
+whether it still says what it said, and marks, for whether it still looks how it looked.
+
+There are no switches to remember: every leg is scored and everything lost is named. `--top` sets
+how many missing words to list per section. Requires Node.js and the UI repository's dependencies
+(`npm --prefix repos/rpa-ai-guidance-hub-ui install`), because the editor leg runs the real editor.
+
+```bash
+uv run task audit "<document>.docx"       # or several
+```
+
+### View
+
+Opens one converted Markdown document in a browser: the Markdown the parser wrote, a diff of what
+normalising it through TipTap changes, and a read-only TipTap rendering. A toggle switches the
+rendering between the original Markdown and the round-tripped Markdown, so you can see the losses
+as well as read them.
+
+Convert the document first with `uv run task convert <document.docx>`; this reads the `.md` it
+wrote to `data/output/`. Naming the `.docx` works too — it stands for the Markdown converted from
+it, since the Word file itself is not something this can render. The server runs until you interrupt
+it, and reloads the page whenever the document is converted again. Requires Node.js and the UI repository's dependencies
+(`npm --prefix repos/rpa-ai-guidance-hub-ui install`).
+
+```bash
+uv run task view "<document>.md"          # add --port N or --no-open if you need them
+```
+
