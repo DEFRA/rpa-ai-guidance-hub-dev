@@ -28,7 +28,7 @@ services:
       AWS_ENDPOINT_URL: http://floci:4566
       # Where cdp-uploader deposits scanned documents.
       SOURCE_DOCS_S3_BUCKET: ${SOURCE_DOCS_S3_BUCKET:-rpa-ai-guidance-hub-source-docs}
-      # Where a converted guide is stored, and where the pictures it draws go.
+      # Where a converted document is stored, and where the pictures it draws go.
       # Both created by compose/floci/start.d/10-setup-resources.sh; the managed
       # bucket is versioned there, the asset bucket deliberately is not.
       MANAGED_DOCS_S3_BUCKET: ${MANAGED_DOCS_S3_BUCKET:-rpa-ai-guidance-hub-managed-docs}
