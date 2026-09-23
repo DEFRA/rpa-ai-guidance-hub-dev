@@ -25,7 +25,7 @@ services:
       # Stubs out ClamAV: uploads are marked clean after this many seconds, so
       # no virus-scanner container is needed locally.
       MOCK_VIRUS_SCAN_ENABLED: true
-      MOCK_VIRUS_RESULT_DELAY: 3
+      MOCK_VIRUS_RESULT_DELAY: ${MOCK_VIRUS_RESULT_DELAY:-3}
       SQS_ENDPOINT: http://floci:4566
       S3_ENDPOINT: http://floci:4566
       # Browser-facing: the uploader builds the `uploadUrl` it hands back from
