@@ -54,3 +54,7 @@ compose.override.yml
 # Cloned service repositories
 repos/
 outputs/
+
+# Working data
+data/
+
