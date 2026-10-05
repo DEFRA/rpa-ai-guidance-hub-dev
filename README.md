@@ -160,3 +160,21 @@ Switches to and pulls the latest main branch for each microservice.
 ```bash
 uv run task update
 ```
+
+### Convert
+
+Converts Word guidance documents with the API repository's own parser
+(`scripts/parse_docx.py`), writing them under `data/output/` in the managed docs bucket's layout:
+`<document id>/<version id>/content.md`, with pictures in `<document id>/assets/`. Each
+conversion is a new document under fresh uuids, even of a document converted before.
+A `.docx` is looked up in `data/input/` when it is not a path that exists. Nothing
+document-related is installed here: the parse runs in the repository that owns it, so what comes
+out is what the application would produce.
+
+To add a version to a document instead, convert the newer `.docx` with the `documentId` an
+earlier conversion printed. The version written last is the latest.
+
+```bash
+uv run task convert "<document>.docx"     # or several; --into DIR to write elsewhere
+uv run task convert "<newer>.docx" --document-id <documentId>
+```
