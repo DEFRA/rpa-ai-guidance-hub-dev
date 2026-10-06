@@ -31,7 +31,11 @@ def resolve_uv() -> str:
 
 
 def resolve_input(name: str) -> Path:
-    """Resolve a document argument to a readable .docx, or fail with advice."""
+    """Resolve a document argument to a readable .docx, as given or in INPUT_DIR.
+
+    Raises FileNotFoundError naming the argument, so a caller can gather every
+    missing document before reporting them.
+    """
     given = Path(name)
     if given.is_file():
         return given.resolve()
@@ -40,8 +44,7 @@ def resolve_input(name: str) -> Path:
     if in_data.is_file():
         return in_data.resolve()
 
-    message = f"Document not found: {name}\nLooked for it as given, and in {INPUT_DIR}."
-    raise SystemExit(message)
+    raise FileNotFoundError(name)
 
 
 def run_in_api_repo(

@@ -36,7 +36,13 @@ import argparse
 import sys
 from pathlib import Path
 
-from docx_tools import OUTPUT_DIR, resolve_input, resolve_uv, run_in_api_repo
+from docx_tools import (
+    INPUT_DIR,
+    OUTPUT_DIR,
+    resolve_input,
+    resolve_uv,
+    run_in_api_repo,
+)
 
 PARSE_SCRIPT = "scripts/parse_docx.py"
 
@@ -91,7 +97,24 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
 
-    documents = [resolve_input(name) for name in args.documents]
+    documents: list[Path] = []
+    missing: list[str] = []
+    for name in args.documents:
+        try:
+            documents.append(resolve_input(name))
+        except FileNotFoundError:
+            missing.append(name)
+
+    # Every name is checked before any document is converted. Each conversion is a
+    # new document, so a batch that carried on past a typo and was then run again in
+    # full would duplicate every guide it had already written.
+    if missing:
+        message = (
+            f"Not found: {', '.join(missing)}\n"
+            f"Looked for each as given, and in {INPUT_DIR}."
+        )
+        raise SystemExit(message)
+
     into = Path(args.into).resolve() if args.into else OUTPUT_DIR
 
     # Resolved once, and before any work starts, so a missing tool is reported
