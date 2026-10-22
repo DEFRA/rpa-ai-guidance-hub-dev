@@ -5,7 +5,7 @@ services:
       context: ../repos/rpa-ai-guidance-hub-ui
     ports:
       - '3000:3000'
-      - '9229:9229' # node inspector (nodemon runs with --inspect=0.0.0.0)
+      - '9229:9229' # node inspector, only when the container runs `npm run server:debug`
     links:
       - "floci:floci"
       - "redis:redis"
@@ -42,10 +42,11 @@ services:
       # Destination bucket named in the /initiate call.
       SOURCE_DOCS_S3_BUCKET: ${SOURCE_DOCS_S3_BUCKET:-rpa-ai-guidance-hub-source-docs}
     volumes:
-      # nodemon watches ./src/server and ./src/config with --legacy-watch
-      # (polling), which is what makes reload work over a bind mount.
-      # Client assets are built into /home/node/.public at image build time
-      # and are not shadowed by this mount — changing them needs a rebuild.
+      # `npm run start:dev` runs `vite build --watch`, which rebuilds the client
+      # assets from ./src/client into /home/node/.public (not shadowed by this
+      # mount), and `node --watch`, which restarts the server when the server
+      # source or .public changes. File events reach the container through the
+      # bind mount, so no polling is needed.
       - ../repos/rpa-ai-guidance-hub-ui/src:/home/node/src
     develop:
       watch:
