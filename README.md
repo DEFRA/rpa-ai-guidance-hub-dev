@@ -129,7 +129,7 @@ docker compose exec floci aws s3 ls s3://rpa-ai-guidance-hub-source-docs --endpo
 Both services build their `development` target and bind-mount source from `repos/`:
 
 - **API** — uvicorn reloads on changes under `app/`.
-- **UI** — nodemon reloads on changes under `src/server` and `src/config`. Client-side assets are compiled at image build time, so changes there need `docker compose up --build`.
+- **UI** — `node --watch` restarts the server on changes under `src/`. Vite rebuilds the client-side assets on changes under `src/client`, and the server then restarts to serve them. Only dependency changes need `docker compose up --build` (or `docker compose watch`).
 
 ## Network
 
