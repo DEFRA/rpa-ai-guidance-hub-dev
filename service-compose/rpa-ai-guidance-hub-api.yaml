@@ -32,6 +32,10 @@ services:
       SOURCE_DOCS_S3_BUCKET: ${SOURCE_DOCS_S3_BUCKET:-rpa-ai-guidance-hub-source-docs}
       # AppConfig has no default for this and refuses to start without it.
       CLAUDE_SONNET_MODEL_CONFIG: ${CLAUDE_SONNET_MODEL_CONFIG:-anthropic.claude-sonnet-4-6,arn:aws:bedrock:eu-west-2:123456789012:application-inference-profile/fake-profile-local}
+      # AppConfig has no default for this and refuses to start without it. CDP
+      # injects the real account ID in deployed environments. All zeros is the
+      # default account of floci and of CDP's STS stub (DEFRA/aws-sts-stub).
+      AWS_ACCOUNT: ${AWS_ACCOUNT:-000000000000}
       # AppConfig has no default for these and refuses to start without them.
       REFERENCE_SCHEMES: ${REFERENCE_SCHEMES:-basic-payment-scheme:Basic Payment Scheme,not-specific:Not scheme-specific}
       REFERENCE_AUDIENCES: ${REFERENCE_AUDIENCES:-caseworker:Caseworker,customer:Customer}
