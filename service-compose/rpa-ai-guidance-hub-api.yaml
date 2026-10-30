@@ -37,10 +37,10 @@ services:
       # default account of floci and of CDP's STS stub (DEFRA/aws-sts-stub).
       AWS_ACCOUNT: ${AWS_ACCOUNT:-000000000000}
       # AppConfig has no default for these and refuses to start without them.
-      REFERENCE_SCHEMES: ${REFERENCE_SCHEMES:-basic-payment-scheme:Basic Payment Scheme,not-specific:Not scheme-specific}
-      REFERENCE_AUDIENCES: ${REFERENCE_AUDIENCES:-caseworker:Caseworker,customer:Customer}
-      REFERENCE_SYSTEMS: ${REFERENCE_SYSTEMS:-siti-agri:Siti Agri,crm:CRM}
-      REFERENCE_GUIDANCE_TYPES: ${REFERENCE_GUIDANCE_TYPES:-process-guide:Process guide}
+      REFERENCE_SCHEMES: ${REFERENCE_SCHEMES:-Sustainable Farming Incentive|SFI,Countryside Stewardship|CS,Cross Compliance,Basic Payment Scheme|BPS}
+      REFERENCE_AUDIENCES: ${REFERENCE_AUDIENCES:-Processor,Team leader,Technical specialist,Manager,Other}
+      REFERENCE_SYSTEMS: ${REFERENCE_SYSTEMS:-CRM,SITI Agri,D365,Genesis,Land Management Services|LMS,RPA Application Portal,Rural Payments Service,Inspections Workbench,IMIS}
+      REFERENCE_GUIDANCE_TYPES: ${REFERENCE_GUIDANCE_TYPES:-Process guide}
     volumes:
       - ../repos/rpa-ai-guidance-hub-api/app:/home/nonroot/app
     develop:
