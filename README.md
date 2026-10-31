@@ -178,3 +178,19 @@ earlier conversion printed. The version written last is the latest.
 uv run task convert "<document>.docx"     # or several; --into DIR to write elsewhere
 uv run task convert "<newer>.docx" --document-id <documentId>
 ```
+
+### Audit
+
+Reports what the conversion loses, with the API repository's own audit (`scripts/audit_docx.py`):
+the share of each Word section the Markdown covers, and the words, URLs and marks that never
+reached it. Nothing is written; the report goes to the console.
+
+When Node is installed and the UI repository has its `node_modules`, the converted Markdown also
+takes a round trip through the guide editor (the UI's `scripts/round-trip-markdown.js`), loaded
+and saved as a designer would. The audit then scores what survives the save too, and lists each
+line the load and save changes, or says nothing changed. Without them, the audit runs without the
+round trip and says so.
+
+```bash
+uv run task audit "<document>.docx"      # or several; --top N to list more missing words
+```
