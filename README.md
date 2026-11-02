@@ -76,6 +76,7 @@ Note that `.env` holds *host*-oriented endpoints, for running a service directly
 | SOURCE_DOCS_S3_BUCKET | rpa-ai-guidance-hub-source-docs | No | Destination bucket for documents uploaded through cdp-uploader |
 | AWS_BEARER_TOKEN_BEDROCK | dummy_token_for_bedrock | No | Bedrock bearer token; replace to call a real model |
 | CLAUDE_SONNET_MODEL_CONFIG | placeholder profile ARN | No | `model_id,inference_profile[,guardrail_id:guardrail_version]`; the API will not start without it |
+| DEV_USER_ROLES | None (empty) | No | Comma-separated roles assigned to the UI local dev mock user (e.g. `Hub.Editor,Hub.Viewer`) |
 
 ### Starting the Services
 
