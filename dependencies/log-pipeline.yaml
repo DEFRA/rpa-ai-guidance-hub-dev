@@ -1,0 +1,64 @@
+# Opt-in local view of what CDP's OpenSearch would store for each service's
+# logs. Start with:  docker compose --profile logs up --build
+# then open http://localhost:5601 (Discover → "CDP logs").
+#
+# log-pipeline tails every container in this compose project via the Docker
+# API, runs each line through @defra/cdp-log-pipeline (CDP's Fluent Bit +
+# OpenSearch Ingestion + include_keys/mapping rules) and indexes the result.
+services:
+  opensearch:
+    image: opensearchproject/opensearch@sha256:e96cc6ae1500a073d973c0906f30f7cf4d9c461f32f855f9242a2da933660cdd # 2.19.3
+    profiles: [logs]
+    environment:
+      discovery.type: single-node
+      # Local only: no TLS/auth, so the shipper and dashboards need no certs.
+      DISABLE_SECURITY_PLUGIN: 'true'
+      DISABLE_INSTALL_DEMO_CONFIG: 'true'
+      OPENSEARCH_JAVA_OPTS: -Xms512m -Xmx512m
+    ports:
+      - '9200:9200'
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -sf localhost:9200/_cluster/health || exit 1']
+      interval: 10s
+      start_period: 30s
+      retries: 12
+    networks:
+      - rpa-ai-guidance-hub
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards@sha256:19e0dd30c7086e933cf475726d92ccc98be26ced9f0c4e4a2a3ae6d9539280a3 # 2.19.3
+    profiles: [logs]
+    environment:
+      OPENSEARCH_HOSTS: '["http://opensearch:9200"]'
+      DISABLE_SECURITY_DASHBOARDS_PLUGIN: 'true'
+    ports:
+      - '5601:5601'
+    depends_on:
+      opensearch:
+        condition: service_healthy
+    networks:
+      - rpa-ai-guidance-hub
+
+  log-pipeline:
+    build:
+      context: ../compose/log-pipeline
+    profiles: [logs]
+    environment:
+      OPENSEARCH_URL: http://opensearch:9200
+      DASHBOARDS_URL: http://opensearch-dashboards:5601
+      # Infrastructure that does not run as a CDP service, plus this stack.
+      EXCLUDE_SERVICES: ${LOG_PIPELINE_EXCLUDE_SERVICES:-floci,mongodb,redis,opensearch,opensearch-dashboards,log-pipeline}
+    volumes:
+      # Read-only: only container listing, events and logs are read.
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      opensearch:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - rpa-ai-guidance-hub
+
+volumes:
+  opensearch-data:

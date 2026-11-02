@@ -45,6 +45,7 @@ There is no test suite in this repo.
 - **`redis`** backs the UI's session cache. Under `NODE_ENV=development` the UI defaults to an in-memory cache, so redis is idle until the UI is run with production-like session config.
 - **`cdp-uploader`** (`dependencies/cdp-uploader.yaml`) is the platform's file-upload service, on port 7337. Uploads land in `cdp-uploader-quarantine`, are scanned, and are copied to whichever destination bucket the initiating service named — here `rpa-ai-guidance-hub-source-docs`. `MOCK_VIRUS_SCAN_ENABLED` stubs out ClamAV (clean after 3s), so no scanner container is needed. Nothing consumes it yet; it is wired up ready.
   - Unlike the reference project, there is no `nginx-proxy` in front of it. That proxy exists to serve `uploader.*.sslip.io` virtual hosts, nothing addresses the uploader that way (both URL variables point straight at 7337), and it costs a bind-mount of the Docker socket.
+- **CDP log view** (`dependencies/log-pipeline.yaml`, opt-in `logs` profile): `opensearch` + `opensearch-dashboards` + `log-pipeline`. `log-pipeline` (source in `compose/log-pipeline/`) reads the read-only Docker socket, tails every container in this compose project and runs each line through `@defra/cdp-log-pipeline`'s `createPipeline()`. It indexes the results into `cdp-logs` (with CDP's real mapping, read from the package), `cdp-broken-logs`, `cdp-audit-logs` and `cdp-log-pipeline-report` (the `--explain` output). It also provisions the Dashboards index patterns and saved searches on startup. The first time it follows a service it also creates a dashboard for it (`service-<name>`, CDP's per-service layout, Application Logs only; MongoDB logs are left out on purpose). Document ids hash container id + Docker timestamp + line, so re-reads are idempotent. To pick up CDP pipeline changes, bump the package version. Do not re-implement the pipeline here. The UI's `LOG_FORMAT` is `${LOG_FORMAT:-pino-pretty}`, so it can be switched to `ecs` for this.
 - One Docker network, `rpa-ai-guidance-hub`, shared by every service.
 - Local AWS credentials are dummy values (`test`/`test`, region `eu-west-2`) — everything points at `floci`, not real AWS. Bedrock is the exception: `CLAUDE_SONNET_MODEL_CONFIG` needs a real inference-profile ARN to exercise the LLM.
 
@@ -59,6 +60,8 @@ There is no test suite in this repo.
 | 27017 | mongodb              |
 | 6379  | redis                |
 | 7337  | cdp-uploader         |
+| 9200  | opensearch (`logs` profile) |
+| 5601  | OpenSearch Dashboards (`logs` profile) |
 
 ## Configuration
 

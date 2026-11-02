@@ -23,7 +23,9 @@ services:
       # The repo's own compose.yml sets production, which flips convict to
       # redis-backed sessions, secure cookies and ECS logs.
       NODE_ENV: development
-      LOG_FORMAT: pino-pretty
+      # Set LOG_FORMAT=ecs (shell or .env) to emit the JSON CDP receives, e.g.
+      # when inspecting logs with `--profile logs`.
+      LOG_FORMAT: ${LOG_FORMAT:-pino-pretty}
       SESSION_COOKIE_SECURE: false
       SESSION_CACHE_ENGINE: redis
       REDIS_HOST: redis
