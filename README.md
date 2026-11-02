@@ -115,7 +115,7 @@ Once up: <http://localhost:3000> for the UI, <http://localhost:8085/docs> for th
 
 ## Logging
 
-Services must emit [ECS](https://www.elastic.co/guide/en/ecs/current/index.html)-compliant logs: structured data nested under `event.*` or `error.*` using the approved fields, as flat top-level keys are silently dropped. See the [ECS logging compliance skills](https://github.com/DEFRA/fcp-sfd-core/tree/main/fcp-sfd-copilot/ecs-logging-compliance/skills) for the requirements.
+Services must emit [ECS](https://www.elastic.co/guide/en/ecs/current/index.html)-compliant logs: structured data nested under `event.*` or `error.*` using the approved fields, as flat top-level keys are silently dropped.
 
 To check locally how your logs will be stored, start the compose project with the opt-in `logs` profile and ECS-formatted logging:
 
@@ -143,7 +143,7 @@ docker compose exec floci aws s3 ls s3://rpa-ai-guidance-hub-source-docs --endpo
 Both services build their `development` target and bind-mount source from `repos/`:
 
 - **API** — uvicorn reloads on changes under `app/`.
-- **UI** — nodemon reloads on changes under `src/server` and `src/config`. Client-side assets are compiled at image build time, so changes there need `docker compose up --build`.
+- **UI** — `node --watch` restarts the server on changes under `src/`. Vite rebuilds the client-side assets on changes under `src/client`, and the server then restarts to serve them. Only dependency changes need `docker compose up --build` (or `docker compose watch`).
 
 ## Network
 
@@ -191,4 +191,20 @@ earlier conversion printed. The version written last is the latest.
 ```bash
 uv run task convert "<document>.docx"     # or several; --into DIR to write elsewhere
 uv run task convert "<newer>.docx" --document-id <documentId>
+```
+
+### Audit
+
+Reports what the conversion loses, with the API repository's own audit (`scripts/audit_docx.py`):
+the share of each Word section the Markdown covers, and the words, URLs and marks that never
+reached it. Nothing is written; the report goes to the console.
+
+When Node is installed and the UI repository has its `node_modules`, the converted Markdown also
+takes a round trip through the guide editor (the UI's `scripts/round-trip-markdown.js`), loaded
+and saved as a designer would. The audit then scores what survives the save too, and lists each
+line the load and save changes, or says nothing changed. Without them, the audit runs without the
+round trip and says so.
+
+```bash
+uv run task audit "<document>.docx"      # or several; --top N to list more missing words
 ```
