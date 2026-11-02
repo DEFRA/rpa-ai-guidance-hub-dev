@@ -108,8 +108,22 @@ The services can still be started individually from their own repositories. This
 | 27017 | mongodb |
 | 6379 | redis |
 | 7337 | cdp-uploader |
+| 9200 | opensearch (`logs` profile) |
+| 5601 | OpenSearch Dashboards (`logs` profile) |
 
 Once up: <http://localhost:3000> for the UI, <http://localhost:8085/docs> for the API's Swagger UI.
+
+## Logging
+
+Services must emit [ECS](https://www.elastic.co/guide/en/ecs/current/index.html)-compliant logs: structured data nested under `event.*` or `error.*` using the approved fields, as flat top-level keys are silently dropped. See the [ECS logging compliance skills](https://github.com/DEFRA/fcp-sfd-core/tree/main/fcp-sfd-copilot/ecs-logging-compliance/skills) for the requirements.
+
+To check locally how your logs will be stored, start the compose project with the opt-in `logs` profile and ECS-formatted logging:
+
+```bash
+LOG_FORMAT=ecs docker compose --profile logs up --build
+```
+
+Then open OpenSearch Dashboards at <http://localhost:5601> → **Dashboards** and pick your service's dashboard. Lines that would be rejected appear in the `cdp-broken-logs` index. OpenSearch needs about 1 GB of memory.
 
 ## File Uploads
 

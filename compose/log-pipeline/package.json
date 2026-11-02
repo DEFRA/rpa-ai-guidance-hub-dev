@@ -1,0 +1,15 @@
+{
+  "name": "local-cdp-log-pipeline",
+  "private": true,
+  "type": "module",
+  "description": "Tails this compose project's containers through @defra/cdp-log-pipeline into a local OpenSearch",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "@defra/cdp-log-pipeline": "0.1.0"
+  }
+}
