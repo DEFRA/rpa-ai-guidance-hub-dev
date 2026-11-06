@@ -26,6 +26,9 @@ services:
       MONGO_URI: mongodb://mongodb:27017/
       FLOCI_ENDPOINT_URL: http://floci:4566
       AWS_ENDPOINT_URL: http://floci:4566
+      # The queue of documents to convert, made by
+      # compose/floci/start.d/10-setup-resources.sh. The whole URL, as CDP gives it.
+      CONVERSIONS_SQS_QUEUE_URL: http://floci:4566/000000000000/rpa_ai_guidance_hub_conversions
       # Where cdp-uploader deposits scanned documents. Not consumed yet —
       # AppConfig has no matching field, and its env source only reads
       # declared ones, so this sits in the environment until one is added.
