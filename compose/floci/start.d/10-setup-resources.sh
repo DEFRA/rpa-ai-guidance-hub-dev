@@ -10,6 +10,9 @@
 aws s3 mb --endpoint-url=http://localhost:4566 s3://rpa-ai-guidance-hub-source-docs || true
 aws s3 mb --endpoint-url=http://localhost:4566 s3://rpa-ai-guidance-hub-managed-docs || true
 
+# Where the search service publishes its index builds and loads the active one from.
+aws s3 mb --endpoint-url=http://localhost:4566 s3://rpa-ai-guidance-hub-search-index || true
+
 # SQS queues
 
 # The queue of documents to convert. As CDP's tenant config defines it in every

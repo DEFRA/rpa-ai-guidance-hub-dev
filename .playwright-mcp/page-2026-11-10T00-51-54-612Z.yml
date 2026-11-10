@@ -1,0 +1,108 @@
+- generic [active] [ref=f3e1]:
+  - link "Skip to main content" [ref=f3e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=f3e3]:
+    - navigation "Guidance hub" [ref=f3e5]:
+      - generic [ref=f3e6]:
+        - generic [ref=f3e7]:
+          - img "Department for Environment, Food & Rural Affairs" [ref=f3e8]
+          - paragraph [ref=f3e9]:
+            - link "RPA Guidance Hub" [ref=f3e10] [cursor=pointer]:
+              - /url: /hub
+        - button "Collapse navigation" [ref=f3e11] [cursor=pointer]
+      - list [ref=f3e16]:
+        - listitem [ref=f3e17]:
+          - link "Hub" [ref=f3e18] [cursor=pointer]:
+            - /url: /hub
+        - listitem [ref=f3e24]:
+          - link "Recently opened" [ref=f3e25] [cursor=pointer]:
+            - /url: /hub/recently-opened
+        - listitem [ref=f3e30]:
+          - link "Pinned 0 guides" [ref=f3e31] [cursor=pointer]:
+            - /url: /hub/pinned
+            - generic [ref=f3e34]: Pinned
+            - generic [ref=f3e35]:
+              - text: "0"
+              - generic [ref=f3e36]: guides
+        - listitem [ref=f3e37]:
+          - link "Bookmarked guides" [ref=f3e38] [cursor=pointer]:
+            - /url: /hub/bookmarked-guides
+      - heading "Designing" [level=2] [ref=f3e42]
+      - list "Designing" [ref=f3e43]:
+        - listitem [ref=f3e44]:
+          - link "Upload guidance" [ref=f3e45] [cursor=pointer]:
+            - /url: /create-guidance/upload-guide
+      - group [ref=f3e50]:
+        - generic "Pinned guidance 0 pinned" [ref=f3e51] [cursor=pointer]:
+          - generic [ref=f3e52]: Pinned guidance
+          - generic [ref=f3e53]:
+            - text: "0"
+            - generic [ref=f3e54]: pinned
+        - paragraph [ref=f3e57]: You haven't pinned any guidance yet.
+      - group [ref=f3e58]:
+        - generic "Case bookmarks 0 bookmarked" [ref=f3e59] [cursor=pointer]:
+          - generic [ref=f3e60]: Case bookmarks
+          - generic [ref=f3e61]:
+            - text: "0"
+            - generic [ref=f3e62]: bookmarked
+        - paragraph [ref=f3e65]: You haven't bookmarked any guidance to a case yet.
+      - list [ref=f3e66]:
+        - listitem [ref=f3e67]:
+          - generic [ref=f3e68]: Dev User
+          - generic [ref=f3e69]: Viewer, Designer
+        - listitem [ref=f3e70]:
+          - link "Sign out" [ref=f3e71] [cursor=pointer]:
+            - /url: /logout
+    - main [ref=f3e74]:
+      - generic [ref=f3e78]:
+        - heading "RPA Guidance hub" [level=1] [ref=f3e79]
+        - search [ref=f3e80]:
+          - generic [ref=f3e81]: Search or ask question
+          - generic [ref=f3e82]:
+            - searchbox "Search or ask question" [ref=f3e83]: Record the sample
+            - button "Search" [ref=f3e84] [cursor=pointer]
+        - paragraph [ref=f3e89]: Find guidance to help you review and process claims, or manage guidance documents if you're responsible for keeping them up to date.
+      - generic [ref=f3e93]:
+        - generic [ref=f3e94]:
+          - heading "1 guide" [level=2] [ref=f3e95]
+          - paragraph [ref=f3e96]: 25 sections with these words
+          - paragraph [ref=f3e97]:
+            - link "Clear search" [ref=f3e98] [cursor=pointer]:
+              - /url: /hub
+        - list [ref=f3e99]:
+          - listitem [ref=f3e100]:
+            - heading [level=3] [ref=f3e101]:
+              - link "Fictional Demonstration Guide" [ref=f3e102] [cursor=pointer]:
+                - /url: /guides/01a1c16b-08a9-74c2-8829-0f91a7ec6992
+            - paragraph [ref=f3e103]: 25 sections with these words
+            - list [ref=f3e104]:
+              - listitem [ref=f3e105]:
+                - heading [level=4] [ref=f3e106]:
+                  - link "4 3 Sample record categories" [ref=f3e107] [cursor=pointer]:
+                    - /url: /guides/01a1c16b-08a9-74c2-8829-0f91a7ec6992#4-3--sample-record-categories
+                - paragraph [ref=f3e108]: 2 matches
+                - paragraph [ref=f3e109]:
+                  - mark [ref=f3e110]: Record the sample
+                  - text: result in the demonstration workspace and compare the visible output with the expected layout.
+              - listitem [ref=f3e111]:
+                - heading [level=4] [ref=f3e112]:
+                  - link "13 12 Recording alternative sample explanations" [ref=f3e113] [cursor=pointer]:
+                    - /url: /guides/01a1c16b-08a9-74c2-8829-0f91a7ec6992#13-12--recording-alternative-sample-explanations
+                - paragraph [ref=f3e114]: 3 matches
+                - paragraph [ref=f3e115]:
+                  - mark [ref=f3e116]: Record the sample
+                  - text: result in the demonstration workspace and compare the visible.
+              - listitem [ref=f3e117]:
+                - heading [level=4] [ref=f3e118]:
+                  - link "3 2 Understanding a sample record" [ref=f3e119] [cursor=pointer]:
+                    - /url: /guides/01a1c16b-08a9-74c2-8829-0f91a7ec6992#3-2--understanding-a-sample-record
+                - paragraph [ref=f3e120]: 3 matches
+                - paragraph [ref=f3e121]:
+                  - mark [ref=f3e122]: Record the sample
+                  - text: result in the demonstration workspace and compare the visible output with the expected layout.
+            - paragraph [ref=f3e123]:
+              - 'link "See all 25 sections in this guide : Fictional Demonstration Guide" [ref=f3e124] [cursor=pointer]':
+                - /url: /hub?q=Record+the+sample&guide=01a1c16b-08a9-74c2-8829-0f91a7ec6992
+                - text: See all 25 sections in this guide
+                - generic [ref=f3e125]: ": Fictional Demonstration Guide"
+  - contentinfo [ref=f3e126]

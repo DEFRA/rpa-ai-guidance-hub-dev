@@ -1,0 +1,28 @@
+- generic [active] [ref=f1e1]:
+  - link "Skip to main content" [ref=f1e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=f1e3]:
+    - img "Department for Environment, Food & Rural Affairs" [ref=f1e6]
+  - main [ref=f1e8]:
+    - generic [ref=f1e10]:
+      - generic [ref=f1e11]:
+        - paragraph [ref=f1e12]: Rural Payments Agency
+        - heading "Guidance hub" [level=1] [ref=f1e13]
+        - paragraph [ref=f1e14]: Find, review and manage RPA guidance documents, all in one place.
+        - button "Sign in" [ref=f1e15] [cursor=pointer]
+        - paragraph [ref=f1e18]: This is an internal service. You need a Defra account to sign in.
+      - generic [ref=f1e19]:
+        - heading "What you can do in the hub" [level=2] [ref=f1e20]
+        - list [ref=f1e21]:
+          - listitem [ref=f1e22]: search all RPA guidance by document name, scheme or topic
+          - listitem [ref=f1e23]: check whether a document is up to date
+          - listitem [ref=f1e24]: pick up drafts you are working on
+          - listitem [ref=f1e25]: review and approve documents sent to you
+    - generic [ref=f1e28]:
+      - heading "If you cannot sign in" [level=2] [ref=f1e29]
+      - paragraph [ref=f1e30]:
+        - text: Email the AI Capability and Enablement team at
+        - link "AICapabilityAndEnablement@defra.gov.uk" [ref=f1e31] [cursor=pointer]:
+          - /url: mailto:AICapabilityAndEnablement@defra.gov.uk
+        - text: .
+  - contentinfo [ref=f1e32]

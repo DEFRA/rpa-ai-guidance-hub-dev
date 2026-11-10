@@ -35,6 +35,8 @@ services:
       # None of the four below are consumed yet — the UI's convict schema
       # validates with `allowed: 'strict'`, so each needs a matching entry in
       # src/config/config.js before it reaches the app.
+      # Server-side URL of the search service.
+      SEARCH_API_BASE_URL: http://rpa-ai-guidance-hub-search:8086
       API_BASE_URL: http://rpa-ai-guidance-hub-api:8085
       # Server-side: where the UI POSTs /initiate to start an upload.
       CDP_UPLOADER_BASE_URL: http://cdp-uploader:7337

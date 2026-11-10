@@ -1,0 +1,6 @@
+[     111ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/public/assets/manifest.json:0
+[     111ms] [ERROR] Manifest fetch from http://localhost:3000/public/assets/manifest.json failed, code 404 @ http://localhost:3000/:0
+[     129ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/public/assets/manifest.json:0
+[     132ms] [ERROR] Manifest fetch from http://localhost:3000/public/assets/manifest.json failed, code 404 @ http://localhost:3000/:0
+[     133ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/public/assets/images/favicon.svg:0
+[     144ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/public/assets/images/favicon.ico:0

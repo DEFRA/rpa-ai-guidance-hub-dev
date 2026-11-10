@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is **not** the application. It is the local-development orchestrator for the RPA AI Guidance Hub: a Docker Compose project plus `uv`/`taskipy` scripts that clone and run the actual service repositories together with their dependencies. The application code lives in separate repos that this project checks out into `repos/`:
 
 - `rpa-ai-guidance-hub-api` — Python/FastAPI backend (port 8085)
+- `rpa-ai-guidance-hub-search` — Python/FastAPI search service (port 8086)
 - `rpa-ai-guidance-hub-ui` — JavaScript/hapi frontend (port 3000)
 
 Changes here are about *how services are wired up locally* (compose files, init scripts, env defaults, clone/pull tooling), not about the services' own logic.
@@ -56,6 +57,7 @@ There is no test suite in this repo.
 | 3000  | UI                   |
 | 9229  | UI node inspector    |
 | 8085  | API                  |
+| 8086  | search               |
 | 4566  | floci (AWS)          |
 | 27017 | mongodb              |
 | 6379  | redis                |
