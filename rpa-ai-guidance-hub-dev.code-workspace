@@ -7,6 +7,9 @@
       "path": "repos/rpa-ai-guidance-hub-api"
     },
     {
+      "path": "repos/rpa-ai-guidance-hub-search"
+    },
+    {
       "path": "repos/rpa-ai-guidance-hub-ui"
     }
   ],

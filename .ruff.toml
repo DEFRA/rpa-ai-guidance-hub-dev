@@ -79,6 +79,8 @@ unfixable = []
 
 [lint.isort]
 known-third-party = ["fastapi", "pydantic", "motor", "pytest"]
+# The API's package, imported by scripts run in the API repository's environment.
+known-first-party = ["app"]
 
 [format]
 # Like Black, use double quotes for strings

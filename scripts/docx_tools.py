@@ -69,13 +69,25 @@ def resolve_input(name: str) -> Path:
 
 
 def run_in_api_repo(
-    uv: str, script: str, arguments: list[str], *, capture: bool = False
+    uv: str,
+    script: str,
+    arguments: list[str],
+    *,
+    capture: bool = False,
+    env_file: Path | None = None,
 ) -> str:
-    """Run one of the API repository's scripts there, in its own environment.
+    """Run a script in the API repository's environment, from that repository.
+
+    `script` is one of the API repository's own scripts, or an absolute path to one
+    kept here that imports the application. The API repository is put on PYTHONPATH,
+    so `app` imports from either.
 
     Every path handed on must already be absolute: the child runs with its working
     directory set to the API repository, where a relative path would mean somewhere
     else entirely.
+
+    `env_file` is loaded into the child's environment by uv, as the application's
+    configuration expects.
 
     `capture` returns the script's stdout instead of letting it through, which is how
     a caller learns where a guide was stored: the store owns that layout, and a
@@ -91,9 +103,16 @@ def run_in_api_repo(
     # mismatch on every document; dropping the variable lets it select the API
     # repository's own environment quietly.
     env = {k: v for k, v in os.environ.items() if k != "VIRTUAL_ENV"}
+    env["PYTHONPATH"] = os.pathsep.join(
+        filter(None, [str(API_REPO), env.get("PYTHONPATH")])
+    )
+    env_options = ["--env-file", str(env_file)] if env_file else []
+    # uv runs a .py outside the project as a standalone script, without the
+    # project's dependencies; naming python keeps it in the project environment.
+    command = ["python", script] if Path(script).is_absolute() else [script]
 
     result = subprocess.run(  # noqa: S603 - fixed argv, no shell
-        [uv, "run", "--directory", str(API_REPO), script, *arguments],
+        [uv, "run", "--directory", str(API_REPO), *env_options, *command, *arguments],
         env=env,
         stdout=subprocess.PIPE if capture else None,
         text=True,

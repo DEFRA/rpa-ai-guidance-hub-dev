@@ -32,6 +32,17 @@ const excluded = new Set(
     .map((name) => name.trim())
     .filter(Boolean)
 )
+
+// Local CDP services whose dashboards are pre-created at startup (see main),
+// rather than lazily on first log follow. Kept explicit so a new service —
+// such as the search service — has its dashboard in OpenSearch before it has
+// emitted its first log line. Anything started later and not listed here is
+// still covered by ensureServiceDashboard() in follow().
+const localServices = [
+  'rpa-ai-guidance-hub-api',
+  'rpa-ai-guidance-hub-search',
+  'rpa-ai-guidance-hub-ui'
+]
 const followed = new Set()
 const serviceDashboards = new Set()
 const indexer = createBulkIndexer()
@@ -176,6 +187,12 @@ async function main() {
     .catch((error) =>
       console.error(`[log-pipeline] dashboards setup: ${error.message}`)
     )
+
+  // Pre-create per-service dashboards for the known local services so they
+  // exist before any of them produces a log line. ensureServiceDashboard() is
+  // idempotent (tracked in serviceDashboards), so the follow() loop below will
+  // not double-create them.
+  for (const serviceName of localServices) ensureServiceDashboard(serviceName)
 
   watchStarts(labelFilter, followSafely).catch((error) => {
     console.error(`[log-pipeline] docker events: ${error.message}`)

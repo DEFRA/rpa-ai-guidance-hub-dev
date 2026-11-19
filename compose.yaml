@@ -1,5 +1,6 @@
 include:
   - ./service-compose/rpa-ai-guidance-hub-api.yaml
+  - ./service-compose/rpa-ai-guidance-hub-search.yaml
   - ./service-compose/rpa-ai-guidance-hub-ui.yaml
   - ./dependencies/cdp-uploader.yaml
   - ./dependencies/log-pipeline.yaml

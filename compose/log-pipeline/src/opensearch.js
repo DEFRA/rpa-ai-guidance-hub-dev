@@ -286,7 +286,7 @@ async function setupServiceDashboard(serviceName) {
       timeRestore: true,
       timeFrom: 'now-24h',
       timeTo: 'now',
-      refreshInterval: { pause: false, value: 10000 },
+      refreshInterval: { pause: true, value: 10000 },
       kibanaSavedObjectMeta: {
         searchSourceJSON: JSON.stringify({
           query: { query: '', language: 'kuery' },
