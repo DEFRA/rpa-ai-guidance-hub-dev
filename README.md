@@ -17,6 +17,7 @@ Local development support for running / developing the RPA AI Guidance Hub local
 |---------|------|----------|
 | [rpa-ai-guidance-hub-ui](https://github.com/DEFRA/rpa-ai-guidance-hub-ui) | Frontend | JavaScript |
 | [rpa-ai-guidance-hub-api](https://github.com/DEFRA/rpa-ai-guidance-hub-api) | Backend | Python |
+| [rpa-ai-guidance-hub-search](https://github.com/DEFRA/rpa-ai-guidance-hub-search) | Search | Python |
 
 ## Local Development
 
@@ -80,7 +81,7 @@ Note that `.env` holds *host*-oriented endpoints, for running a service directly
 
 ### Starting the Services
 
-A single docker-compose project orchestrates both services and their dependencies.
+A single docker-compose project orchestrates all three services and their dependencies.
 
 ```bash
 docker compose up --build
@@ -105,6 +106,7 @@ The services can still be started individually from their own repositories. This
 | 3000 | UI |
 | 9229 | UI node inspector |
 | 8085 | API |
+| 8086 | search |
 | 4566 | floci (AWS emulator) |
 | 27017 | mongodb |
 | 6379 | redis |
@@ -112,7 +114,7 @@ The services can still be started individually from their own repositories. This
 | 9200 | opensearch (`logs` profile) |
 | 5601 | OpenSearch Dashboards (`logs` profile) |
 
-Once up: <http://localhost:3000> for the UI, <http://localhost:8085/docs> for the API's Swagger UI.
+Once up: <http://localhost:3000> for the UI, <http://localhost:8085/docs> for the API's Swagger UI, <http://localhost:8086/docs> for search's.
 
 ## Logging
 
@@ -141,9 +143,9 @@ docker compose exec floci aws s3 ls s3://rpa-ai-guidance-hub-source-docs --endpo
 
 ## Live Reload
 
-Both services build their `development` target and bind-mount source from `repos/`:
+All three services build their `development` target and bind-mount source from `repos/`:
 
-- **API** — uvicorn reloads on changes under `app/`.
+- **API** and **search** — uvicorn reloads on changes under `app/`.
 - **UI** — `node --watch` restarts the server on changes under `src/`. Vite rebuilds the client-side assets on changes under `src/client`, and the server then restarts to serve them. Only dependency changes need `docker compose up --build` (or `docker compose watch`).
 
 ## Network
@@ -209,3 +211,23 @@ round trip and says so.
 ```bash
 uv run task audit "<document>.docx"      # or several; --top N to list more missing words
 ```
+
+### Publish
+
+Sends the search service a publish trigger (`PUT /documents/{id}/versions/{versionId}`) for the
+latest version of every guide in the API's Mongo, so search indexes them. The trigger names the
+content by its `contentUrl`; nothing reads S3 here. Search answers 202 and indexes in the
+background, so whether indexing worked is in search's log.
+
+`scripts/publish_to_search.py` reads Mongo with the API's own code, so it runs in the API
+repository's environment, with that repository's `.env` when it has one. Mongo and search must be
+up (`docker compose up`).
+
+```bash
+uv run task publish --dry-run --limit 3    # print what would be sent
+uv run task publish                        # every guide
+uv run task publish --document-id <uuid>   # repeatable; also --limit N, --delay SECONDS, --url URL
+```
+
+`--url` defaults to `http://localhost:8086`. `--mode sns` is stubbed until search has an SNS
+consumer.

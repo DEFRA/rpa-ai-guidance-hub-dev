@@ -10,8 +10,8 @@
 aws s3 mb --endpoint-url=http://localhost:4566 s3://rpa-ai-guidance-hub-source-docs || true
 aws s3 mb --endpoint-url=http://localhost:4566 s3://rpa-ai-guidance-hub-managed-docs || true
 
-# Where the search service publishes its index builds and loads the active one from.
-aws s3 mb --endpoint-url=http://localhost:4566 s3://rpa-ai-guidance-hub-search-index || true
+# The search service's store: sections, chunk sets, and the index builds it loads.
+aws s3 mb --endpoint-url=http://localhost:4566 s3://rpa-ai-guidance-hub-search-store || true
 
 # SQS queues
 

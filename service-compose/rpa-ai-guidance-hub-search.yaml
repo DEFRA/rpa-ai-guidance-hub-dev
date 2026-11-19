@@ -26,9 +26,9 @@ services:
       MONGO_URI: mongodb://mongodb:27017/
       FLOCI_ENDPOINT_URL: http://floci:4566
       AWS_ENDPOINT_URL: http://floci:4566
-      # Where index builds are published, made by
+      # Sections, chunk sets and index builds, made by
       # compose/floci/start.d/10-setup-resources.sh.
-      SEARCH_INDEX_S3_BUCKET: ${SEARCH_INDEX_S3_BUCKET:-rpa-ai-guidance-hub-search-index}
+      SEARCH_STORE_S3_BUCKET: ${SEARCH_STORE_S3_BUCKET:-rpa-ai-guidance-hub-search-store}
       # AppConfig has no default for this and refuses to start without it.
       CLAUDE_SONNET_MODEL_CONFIG: ${CLAUDE_SONNET_MODEL_CONFIG:-anthropic.claude-sonnet-4-6,arn:aws:bedrock:eu-west-2:123456789012:application-inference-profile/fake-profile-local}
     volumes:

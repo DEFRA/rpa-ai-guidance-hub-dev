@@ -1,6 +1,0 @@
-[      92ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/public/assets/manifest.json:0
-[      92ms] [ERROR] Manifest fetch from http://localhost:3000/public/assets/manifest.json failed, code 404 @ http://localhost:3000/:0
-[     110ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/public/assets/manifest.json:0
-[     110ms] [ERROR] Manifest fetch from http://localhost:3000/public/assets/manifest.json failed, code 404 @ http://localhost:3000/:0
-[    7090ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/public/assets/manifest.json:0
-[    7090ms] [ERROR] Manifest fetch from http://localhost:3000/public/assets/manifest.json failed, code 404 @ http://localhost:3000/hub:0

@@ -1,4 +1,0 @@
-[      70ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/public/assets/manifest.json:0
-[      70ms] [ERROR] Manifest fetch from http://localhost:3000/public/assets/manifest.json failed, code 404 @ http://localhost:3000/hub?q=Record+the+sample:0
-[    5469ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/public/assets/manifest.json:0
-[    5470ms] [ERROR] Manifest fetch from http://localhost:3000/public/assets/manifest.json failed, code 404 @ http://localhost:3000/hub?q=Record+the+sample&guide=01a1c16b-08a9-74c2-8829-0f91a7ec6992:0
