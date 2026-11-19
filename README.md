@@ -220,8 +220,11 @@ content by its `contentUrl`; nothing reads S3 here. Search answers 202 and index
 background, so whether indexing worked is in search's log.
 
 `scripts/publish_to_search.py` reads Mongo with the API's own code, so it runs in the API
-repository's environment, with that repository's `.env` when it has one. Mongo and search must be
-up (`docker compose up`).
+repository's environment. It takes the API's settings from the API repository's `.env` when it
+has one, else from this repository's `.env`, and says which. Quote any value there that has
+spaces, as this repository's `.env.example` does: `uv` stops reading the file at the first that
+is not, with a warning.
+Mongo and search must be up (`docker compose up`).
 
 ```bash
 uv run task publish --dry-run --limit 3    # print what would be sent
