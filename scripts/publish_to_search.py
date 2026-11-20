@@ -13,8 +13,8 @@ runs in the API repository's environment: start it with `uv run task publish`
     $P --delay 0.5                            # every guide, half a second apart
     $P --url http://localhost:8085            # search run from its own repo
 
-Without `--url`, it sends to `SEARCH_API_BASE_URL` from the API's settings, else to
-`http://localhost:8086`, where the stack serves search.
+Without `--url`, it sends to `SEARCH_API_BASE_URL` from the API's settings, which the
+API requires: `http://localhost:8086` in `.env.example`, where the stack serves search.
 
 Only the latest version of each document is sent: search keeps one version per
 document and ignores any older than the latest it has seen. The trigger names the
@@ -49,8 +49,9 @@ import pymongo.asynchronous.database
 from app.common import http_client, mongo
 from app.guidance import ids, models, records
 
-# The search service as the API's settings name it, else where the stack serves it.
-DEFAULT_URL = os.environ.get("SEARCH_API_BASE_URL", "http://localhost:8086")
+# The search service as the API's settings name it: they require it, so it is set
+# whenever the script can read the API's Mongo.
+DEFAULT_URL = os.environ.get("SEARCH_API_BASE_URL")
 SOURCE_TYPE = "guide"
 PUBLISHED = "published"
 BATCH_SIZE = 100
