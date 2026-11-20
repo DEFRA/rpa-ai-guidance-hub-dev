@@ -29,6 +29,10 @@ services:
       # The queue of documents to convert, made by
       # compose/floci/start.d/10-setup-resources.sh. The whole URL, as CDP gives it.
       CONVERSIONS_SQS_QUEUE_URL: http://floci:4566/000000000000/rpa_ai_guidance_hub_conversions
+      # The topic the API publishes guide events to, made by the same script. Not
+      # consumed yet — AppConfig has no matching field, so this sits in the
+      # environment until one is added.
+      GUIDE_EVENTS_SNS_TOPIC_ARN: arn:aws:sns:eu-west-2:000000000000:rpa_ai_guidance_hub_guide_events
       # The search service, for each search a FEATURE_SEARCH_* setting sends there.
       SEARCH_API_BASE_URL: http://rpa-ai-guidance-hub-search:8086
       # Where cdp-uploader deposits scanned documents. Not consumed yet —

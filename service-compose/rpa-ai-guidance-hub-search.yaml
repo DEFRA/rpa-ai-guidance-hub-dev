@@ -29,6 +29,11 @@ services:
       # Sections, chunk sets and index builds, made by
       # compose/floci/start.d/10-setup-resources.sh.
       SEARCH_STORE_S3_BUCKET: ${SEARCH_STORE_S3_BUCKET:-rpa-ai-guidance-hub-search-store}
+      # The queues search consumes, made by the same script. The whole URLs, as CDP
+      # gives them. Not consumed yet — AppConfig has no matching fields, so these
+      # sit in the environment until some are added.
+      SEARCH_INDEXING_SQS_QUEUE_URL: http://floci:4566/000000000000/rpa_ai_guidance_hub_search_indexing
+      SEARCH_INDEX_SYNC_SQS_QUEUE_URL: http://floci:4566/000000000000/rpa_ai_guidance_hub_search_index_sync.fifo
       # AppConfig has no default for this and refuses to start without it.
       CLAUDE_SONNET_MODEL_CONFIG: ${CLAUDE_SONNET_MODEL_CONFIG:-anthropic.claude-sonnet-4-6,arn:aws:bedrock:eu-west-2:123456789012:application-inference-profile/fake-profile-local}
     volumes:
